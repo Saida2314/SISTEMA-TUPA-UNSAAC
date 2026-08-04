@@ -1,0 +1,372 @@
+/* ============================= */
+/* CREAR PERFIL ADMIN GENERAL */
+/* ============================= */
+
+.create-profile-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 49% 51%;
+  background: #fff8f8;
+}
+
+.create-profile-left {
+  position: relative;
+  background:
+    linear-gradient(rgba(82, 0, 17, 0.94), rgba(82, 0, 17, 0.97)),
+    url('/images/hero-cusco.jpg');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 42px;
+}
+
+.exit-profile-link {
+  position: absolute;
+  top: 30px;
+  left: 34px;
+  color: white;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.exit-profile-link:hover {
+  text-decoration: underline;
+}
+
+.profile-brand-box {
+  width: 520px;
+  max-width: 100%;
+  text-align: center;
+}
+
+.profile-logo-box {
+  width: 92px;
+  height: 92px;
+  border-radius: 10px;
+  margin: 0 auto 28px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: grid;
+  place-items: center;
+  font-size: 45px;
+}
+
+.profile-brand-box h1 {
+  font-size: 38px;
+  margin: 0 0 20px;
+  font-weight: 900;
+}
+
+.profile-brand-box > p {
+  color: #f2d9de;
+  font-size: 18px;
+  line-height: 1.45;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.profile-benefits {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.profile-benefit-card {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.12);
+  border-left: 4px solid #ffad22;
+  border-radius: 7px;
+  padding: 18px 22px;
+}
+
+.profile-benefit-card span {
+  color: #ffad22;
+  font-size: 22px;
+}
+
+.profile-benefit-card strong {
+  display: block;
+  color: white;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.profile-benefit-card small {
+  color: #efd4d9;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.profile-footer {
+  position: absolute;
+  bottom: 28px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+}
+
+.create-profile-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 42px 70px;
+}
+
+.create-profile-form {
+  width: 620px;
+  max-width: 100%;
+}
+
+.create-profile-form h2 {
+  color: #520011;
+  font-size: 38px;
+  line-height: 1.1;
+  margin: 0 0 10px;
+  font-weight: 900;
+}
+
+.create-profile-form > p {
+  color: #6b5d60;
+  font-size: 16px;
+  line-height: 1.45;
+  margin: 0 0 34px;
+}
+
+.profile-label {
+  display: block;
+  color: #3f3336;
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 9px;
+}
+
+.profile-role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.profile-role-selector button {
+  height: 82px;
+  background: white;
+  border: 1px solid #ddc5ca;
+  border-radius: 8px;
+  color: #5c4f52;
+  font-weight: 900;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.profile-role-selector button span {
+  font-size: 20px;
+}
+
+.profile-role-selector button:hover,
+.profile-role-selector button.active {
+  border: 2px solid #650017;
+  color: #650017;
+  background: #fff1f3;
+}
+
+.profile-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.profile-input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #ddc5ca;
+  background: white;
+  border-radius: 2px;
+  padding: 0 16px;
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 22px;
+}
+
+.profile-input:focus {
+  border-color: #650017;
+  box-shadow: 0 0 0 3px rgba(101, 0, 23, 0.08);
+}
+
+.profile-password-box {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #ddc5ca;
+  background: white;
+  display: grid;
+  grid-template-columns: 1fr 46px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.profile-password-box:focus-within {
+  border-color: #650017;
+  box-shadow: 0 0 0 3px rgba(101, 0, 23, 0.08);
+}
+
+.profile-password-box input {
+  border: none;
+  outline: none;
+  padding: 0 16px;
+  font-size: 15px;
+  background: transparent;
+}
+
+.profile-password-box button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #8b7a7d;
+}
+
+.profile-help {
+  display: block;
+  color: #7b6a6d;
+  font-size: 12px;
+  margin-bottom: 24px;
+}
+
+.profile-confirm-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #4d4244;
+  font-size: 16px;
+  margin-bottom: 28px;
+}
+
+.profile-confirm-row input {
+  width: 19px;
+  height: 19px;
+  margin-top: 2px;
+}
+
+.profile-error,
+.profile-success {
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 18px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.profile-error {
+  background: #fff0f0;
+  color: #8b0018;
+  border: 1px solid #e6c2c8;
+}
+
+.profile-success {
+  background: #eef8ef;
+  color: #1b6a2c;
+  border: 1px solid #b9e1c1;
+}
+
+.profile-submit {
+  width: 100%;
+  height: 58px;
+  border: none;
+  border-radius: 5px;
+  background: #ffad22;
+  color: #2f1b00;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(255, 173, 34, 0.24);
+}
+
+.profile-submit:hover {
+  background: #f5a000;
+}
+
+.profile-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.profile-bottom-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #76696c;
+  font-size: 12px;
+  margin-top: 38px;
+  border-top: 1px solid #e7d2d6;
+  padding-top: 22px;
+}
+
+.profile-bottom-links div {
+  display: flex;
+  gap: 24px;
+}
+
+.profile-bottom-links a {
+  color: #76696c;
+  cursor: pointer;
+}
+
+.profile-bottom-links a:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE CREAR PERFIL */
+
+@media (max-width: 1050px) {
+  .create-profile-page {
+    grid-template-columns: 1fr;
+  }
+
+  .create-profile-left {
+    min-height: 420px;
+  }
+
+  .profile-footer {
+    display: none;
+  }
+
+  .create-profile-right {
+    padding: 46px 28px;
+  }
+}
+
+@media (max-width: 650px) {
+  .create-profile-left {
+    padding: 80px 24px 36px;
+  }
+
+  .profile-brand-box h1 {
+    font-size: 30px;
+  }
+
+  .profile-brand-box > p {
+    font-size: 15px;
+  }
+
+  .profile-two-columns,
+  .profile-role-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .create-profile-form h2 {
+    font-size: 30px;
+  }
+
+  .profile-bottom-links {
+    flex-direction: column;
+    gap: 14px;
+  }
+}

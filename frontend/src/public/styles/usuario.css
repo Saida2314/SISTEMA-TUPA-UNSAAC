@@ -1,0 +1,13 @@
+/* ============================= */
+/* PANEL TEMPORAL USUARIO */
+/* ============================= */
+
+.role-page {
+  min-height: 100vh;
+  background: var(--fondo-suave);
+  padding: 70px;
+}
+
+.role-page h1 {
+  color: var(--unsaac-guinda);
+}

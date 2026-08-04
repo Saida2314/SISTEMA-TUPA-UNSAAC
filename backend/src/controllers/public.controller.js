@@ -27,17 +27,19 @@ async function listarTramitesPublicos(req, res) {
       query += " AND c.nombre = @categoria";
       request.input("categoria", sql.NVarChar, categoria);
     }
-
     if (buscar && buscar.trim() !== "") {
       query += `
         AND (
-          t.nombre LIKE @buscar
-          OR t.descripcion LIKE @buscar
-          OR t.codigo LIKE @buscar
+        t.nombre COLLATE Modern_Spanish_CI_AI LIKE @buscar COLLATE Modern_Spanish_CI_AI
+        OR t.descripcion COLLATE Modern_Spanish_CI_AI LIKE @buscar COLLATE Modern_Spanish_CI_AI
+        OR t.codigo COLLATE Modern_Spanish_CI_AI LIKE @buscar COLLATE Modern_Spanish_CI_AI
+        OR c.nombre COLLATE Modern_Spanish_CI_AI LIKE @buscar COLLATE Modern_Spanish_CI_AI
         )
       `;
-      request.input("buscar", sql.NVarChar, `%${buscar}%`);
+
+      request.input("buscar", sql.NVarChar, `%${buscar.trim()}%`);
     }
+
 
     query += " ORDER BY t.id_tramite ASC";
 

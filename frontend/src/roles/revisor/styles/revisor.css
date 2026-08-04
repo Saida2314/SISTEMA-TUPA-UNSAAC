@@ -1,0 +1,795 @@
+/* =========================================================
+   REVISOR - LAYOUT GENERAL
+   ========================================================= */
+
+.revisor-shell {
+  min-height: 100vh;
+  background: #fbf8ff;
+  color: #2d2225;
+}
+
+.revisor-topbar {
+  height: 70px;
+  background: #6b0018;
+  color: white;
+  display: grid;
+  grid-template-columns: 260px 1fr auto;
+  align-items: center;
+  padding: 0 24px;
+  box-shadow: 0 8px 22px rgba(45, 0, 15, 0.22);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.revisor-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.revisor-brand img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.revisor-brand strong {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.revisor-nav {
+  display: flex;
+  justify-content: center;
+  gap: 76px;
+  height: 100%;
+}
+
+.revisor-nav a {
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  position: relative;
+  text-decoration: none;
+}
+
+.revisor-nav a.active,
+.revisor-nav a:hover {
+  color: white;
+}
+
+.revisor-nav a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  height: 4px;
+  border-radius: 99px;
+  background: #ffb016;
+}
+
+.revisor-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.revisor-actions > button {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.revisor-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  padding-left: 14px;
+}
+
+.revisor-profile-avatar {
+  width: 34px;
+  height: 34px;
+  background: #ffb016;
+  color: #6b0018;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+
+.revisor-profile strong,
+.revisor-profile small {
+  display: block;
+  line-height: 1.1;
+}
+
+.revisor-profile strong {
+  font-size: 13px;
+}
+
+.revisor-profile small {
+  font-size: 11px;
+  opacity: 0.82;
+}
+
+.revisor-logout {
+  width: auto !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 8px;
+  padding: 7px 10px !important;
+}
+
+.revisor-main {
+  padding: 36px 54px;
+}
+
+/* =========================================================
+   ENCABEZADOS Y BOTONES
+   ========================================================= */
+
+.revisor-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.revisor-page-heading h1 {
+  margin: 0;
+  color: #7a001b;
+  font-size: 36px;
+  line-height: 1.1;
+}
+
+.revisor-page-heading p {
+  margin: 8px 0 0;
+  color: #6f5f63;
+  font-size: 16px;
+}
+
+.revisor-primary-button,
+.revisor-outline-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 22px;
+  border-radius: 8px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.revisor-primary-button {
+  background: #ffad16;
+  color: #6b0018;
+  border: none;
+}
+
+.revisor-outline-button {
+  background: white;
+  color: #7a001b;
+  border: 1px solid #7a001b;
+}
+
+.revisor-outline-button.full {
+  width: 100%;
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.revisor-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 26px;
+  margin-bottom: 28px;
+}
+
+.revisor-metric-card,
+.revisor-office-card,
+.revisor-observed-card,
+.revisor-activity-card {
+  background: white;
+  border: 1px solid #ead9dc;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(70, 0, 20, 0.04);
+}
+
+.revisor-metric-card {
+  padding: 26px;
+}
+
+.metric-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-icon {
+  background: #ffe0e4;
+  color: #7a001b;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.metric-icon.amber {
+  background: #ffedc4;
+  color: #936500;
+}
+
+.metric-label-row small {
+  color: #b00020;
+  font-weight: 900;
+}
+
+.metric-label-row small.green {
+  color: #17934b;
+}
+
+.revisor-metric-card h2,
+.revisor-office-card h2 {
+  color: #2d2225;
+  margin: 26px 0 10px;
+  font-size: 22px;
+}
+
+.metric-number {
+  color: #7a001b;
+  font-size: 38px;
+  font-weight: 900;
+}
+
+.metric-number span {
+  color: #6f5f63;
+  font-size: 14px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.metric-list {
+  margin-top: 20px;
+}
+
+.metric-list p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #4d3e42;
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.dot.red {
+  background: #b00020;
+}
+
+.dot.yellow {
+  background: #ffb016;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 99px;
+  background: #e8edf8;
+  margin: 22px 0 12px;
+  overflow: hidden;
+}
+
+.progress-track div {
+  height: 100%;
+  background: #ffb016;
+  border-radius: 99px;
+}
+
+.metric-note {
+  color: #6f5f63;
+  margin: 0;
+}
+
+.revisor-office-card {
+  padding: 26px;
+}
+
+.office-load {
+  margin-top: 18px;
+}
+
+.office-load p {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  color: #4d3e42;
+  font-weight: 800;
+}
+
+.office-load div {
+  height: 7px;
+  background: #e8edf8;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.office-load span {
+  display: block;
+  height: 100%;
+  background: #7a001b;
+  border-radius: 99px;
+}
+
+.revisor-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 26px;
+}
+
+.revisor-observed-card {
+  overflow: hidden;
+}
+
+.revisor-observed-card header {
+  background: #eaf1ff;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.revisor-observed-card h2 {
+  margin: 0;
+  color: #2d2225;
+}
+
+.revisor-observed-card a {
+  color: #7a001b;
+  font-weight: 900;
+}
+
+.observed-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.observed-grid div {
+  padding: 24px;
+  border-right: 1px solid #ead9dc;
+  border-bottom: 1px solid #ead9dc;
+}
+
+.observed-grid small {
+  background: #ffe0e4;
+  color: #7a001b;
+  padding: 5px 9px;
+  border-radius: 4px;
+  font-weight: 900;
+}
+
+.observed-grid h3 {
+  margin: 14px 0 8px;
+}
+
+.observed-grid p {
+  color: #6f5f63;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.revisor-activity-card {
+  padding: 26px;
+}
+
+.revisor-activity-card h2 {
+  margin-top: 0;
+}
+
+.activity-item {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.activity-item span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ffb016;
+  margin-top: 6px;
+}
+
+.activity-item strong {
+  color: #2d2225;
+}
+
+.activity-item p {
+  margin: 4px 0 0;
+  color: #6f5f63;
+  font-size: 13px;
+}
+
+.revisor-guide-banner {
+  margin-top: 28px;
+  background: linear-gradient(90deg, #7a001b, #90001f);
+  border-radius: 10px;
+  color: white;
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 220px;
+  gap: 24px;
+  align-items: center;
+}
+
+.revisor-guide-banner h2 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.revisor-guide-banner p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.revisor-guide-banner button {
+  border: none;
+  background: #ffb016;
+  color: #6b0018;
+  border-radius: 8px;
+  padding: 14px;
+  font-weight: 900;
+}
+
+/* =========================================================
+   BANDEJA
+   ========================================================= */
+
+.review-filter-card {
+  background: white;
+  border: 1px solid #dec5ca;
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.review-filter-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.review-filter-buttons span {
+  font-weight: 900;
+  color: #4d3e42;
+}
+
+.review-filter-buttons button {
+  border: 1px solid #dec5ca;
+  background: #eef3ff;
+  color: #4d3e42;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.review-filter-buttons button.active {
+  background: #7a001b;
+  color: white;
+  border-color: #7a001b;
+}
+
+.review-search {
+  display: flex;
+  gap: 8px;
+  min-width: 380px;
+}
+
+.review-search input {
+  flex: 1;
+  border: 1px solid #dec5ca;
+  border-radius: 7px;
+  padding: 11px 14px;
+  outline: none;
+}
+
+.review-search button {
+  border: 1px solid #7a001b;
+  background: white;
+  color: #7a001b;
+  border-radius: 7px;
+  padding: 0 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.review-table-card {
+  background: white;
+  border: 1px solid #dec5ca;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.review-table-scroll {
+  overflow-x: auto;
+}
+
+.review-table-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.review-table-card thead {
+  background: #dfeaff;
+}
+
+.review-table-card th {
+  color: #7a001b;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 18px;
+  text-align: left;
+}
+
+.review-table-card td {
+  padding: 20px 18px;
+  border-bottom: 1px solid #ead9dc;
+  color: #2d2225;
+}
+
+.review-code {
+  color: #7a001b;
+}
+
+.review-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-user-cell > span {
+  width: 32px;
+  height: 32px;
+  background: #fff0d2;
+  color: #7a001b;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.review-user-cell strong,
+.review-user-cell small {
+  display: block;
+}
+
+.review-user-cell small {
+  color: #6f5f63;
+}
+
+.review-status {
+  display: inline-block;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.review-status.registered {
+  background: #dfeaff;
+  color: #2458a6;
+}
+
+.review-status.review {
+  background: #fff7e5;
+  color: #936500;
+}
+
+.review-status.observed {
+  background: #ffe9ed;
+  color: #b00020;
+}
+
+.review-status.rejected {
+  background: #ffd7dc;
+  color: #900018;
+}
+
+.review-status.derived {
+  background: #eee7ff;
+  color: #5a37a6;
+}
+
+.review-status.validated {
+  background: #e8f7ee;
+  color: #19733b;
+}
+
+.review-status.neutral {
+  background: #f2f2f2;
+  color: #4d3e42;
+}
+
+.review-view-button {
+  color: #7a001b;
+  border: 1px solid #7a001b;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.review-view-button:hover {
+  background: #7a001b;
+  color: white;
+}
+
+.review-table-card footer {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  color: #6f5f63;
+}
+
+.review-pagination {
+  display: flex;
+  gap: 8px;
+}
+
+.review-pagination button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #dec5ca;
+  background: white;
+  border-radius: 6px;
+}
+
+.review-pagination button.active {
+  background: #7a001b;
+  color: white;
+}
+
+.review-error-message {
+  background: #ffe9ed;
+  border: 1px solid #f3bcc6;
+  color: #b00020;
+  padding: 12px;
+  border-radius: 9px;
+}
+
+.review-bottom-metrics {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.review-bottom-metrics article {
+  background: white;
+  border: 1px solid #ead9dc;
+  border-radius: 10px;
+  padding: 22px;
+}
+
+.review-bottom-metrics span {
+  display: block;
+  color: #6f5f63;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.review-bottom-metrics strong {
+  display: block;
+  color: #7a001b;
+  font-size: 28px;
+  margin: 8px 0;
+}
+
+.review-bottom-metrics small {
+  color: #6f5f63;
+}
+
+.review-bottom-metrics .server-card {
+  background: #7a001b;
+  color: white;
+}
+
+.review-bottom-metrics .server-card span,
+.review-bottom-metrics .server-card small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.review-bottom-metrics .server-card strong {
+  color: white;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .revisor-topbar {
+    grid-template-columns: 1fr;
+    height: auto;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .revisor-nav {
+    justify-content: flex-start;
+    gap: 28px;
+  }
+
+  .revisor-actions {
+    justify-content: flex-start;
+  }
+
+  .revisor-main {
+    padding: 24px;
+  }
+
+  .revisor-dashboard-grid,
+  .revisor-content-grid,
+  .review-bottom-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .revisor-guide-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .review-filter-card {
+    flex-direction: column;
+  }
+
+  .review-search {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .revisor-page-heading {
+    flex-direction: column;
+  }
+
+  .revisor-page-heading h1 {
+    font-size: 30px;
+  }
+
+  .observed-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .review-search {
+    flex-direction: column;
+  }
+}

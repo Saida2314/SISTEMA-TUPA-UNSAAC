@@ -1,0 +1,45 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --unsaac-guinda: #650017;
+  --unsaac-guinda-dark: #520011;
+  --unsaac-guinda-soft: #7a1327;
+  --unsaac-dorado: #ffad22;
+  --unsaac-dorado-dark: #936500;
+  --fondo-suave: #fff8f8;
+  --borde-suave: #ead9dc;
+  --texto-principal: #2b1b1f;
+  --texto-secundario: #5f5255;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo-suave);
+  color: var(--texto-principal);
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+img {
+  max-width: 100%;
+}

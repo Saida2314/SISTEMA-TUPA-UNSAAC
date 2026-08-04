@@ -3,4 +3,11 @@ node_modules
 dist
 .vite
 uploads
-.DS_Store
+
+backend/node_modules
+backend/.env
+backend/uploads
+
+frontend/node_modules
+frontend/dist
+frontend/.vite

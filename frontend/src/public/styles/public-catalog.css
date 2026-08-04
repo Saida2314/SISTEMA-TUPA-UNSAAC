@@ -1,0 +1,312 @@
+
+
+/* ============================= */
+/* CATÁLOGO */
+/* ============================= */
+
+
+.catalog-container {
+  padding: 38px 60px 80px;
+}
+
+
+.catalog-hero {
+  background: linear-gradient(110deg, #520011, #721528);
+  color: white;
+  border-radius: 8px;
+  padding: 36px;
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  align-items: center;
+  min-height: 170px;
+}
+
+
+.catalog-hero h1 {
+  font-size: 33px;
+  margin: 0 0 16px;
+}
+
+
+.catalog-hero p {
+  font-size: 18px;
+  color: #d9b9bf;
+  max-width: 580px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+
+.catalog-search {
+  height: 62px;
+  background: white;
+  border-radius: 7px;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+}
+
+
+.catalog-search span {
+  color: #777;
+  font-size: 23px;
+}
+
+
+.catalog-search input {
+  border: none;
+  outline: none;
+  font-size: 18px;
+  color: #333;
+}
+
+
+.catalog-search input::placeholder {
+  color: #8b7f82;
+}
+
+
+.catalog-tabs {
+  display: flex;
+  gap: 12px;
+  margin: 35px 0 24px;
+  flex-wrap: wrap;
+}
+
+
+.catalog-tabs button {
+  min-width: 110px;
+  padding: 15px 25px;
+  background: white;
+  border: 1px solid #e1c8cc;
+  color: #665558;
+  border-radius: 11px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+
+.catalog-tabs button:hover {
+  border-color: var(--unsaac-guinda);
+  color: var(--unsaac-guinda);
+}
+
+
+.catalog-tabs button.active {
+  background: var(--unsaac-dorado-dark);
+  color: white;
+  border-color: var(--unsaac-dorado-dark);
+}
+
+
+.catalog-counter {
+  color: #5b4a4d;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+
+.catalog-message {
+  background: #fff0f0;
+  border: 1px solid #e1c8cc;
+  color: var(--unsaac-guinda);
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 35px;
+}
+
+
+.procedure-card {
+  background: white;
+  border: 1px solid #e1c8cc;
+  border-radius: 8px;
+  padding: 28px;
+  min-height: 300px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+.procedure-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(101, 0, 23, 0.08);
+}
+
+
+.procedure-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+
+.pill.pregrado {
+  background: #ffe3b7;
+  color: #4c2e00;
+}
+
+
+.pill.posgrado {
+  background: #ffd9df;
+  color: #641121;
+}
+
+
+.pill.administrativo {
+  background: #dfe8ff;
+  color: #39496b;
+}
+
+
+.arrow {
+  font-size: 48px;
+  color: #9a777d;
+  line-height: 1;
+}
+
+
+.procedure-card h2 {
+  font-size: 23px;
+  color: #1f2630;
+  margin: 22px 0 18px;
+}
+
+
+.procedure-card p {
+  color: #5e5355;
+  line-height: 1.45;
+  font-size: 16px;
+  min-height: 72px;
+}
+
+
+.procedure-line {
+  height: 1px;
+  background: #e3cbcf;
+  margin: 28px 0 22px;
+}
+
+
+.procedure-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+
+.procedure-meta span {
+  display: block;
+  color: #7d6c70;
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+
+.procedure-meta strong {
+  color: #4d0715;
+  font-size: 18px;
+}
+
+.procedure-detail-button {
+  display: inline-flex;
+  margin-top: 22px;
+  color: #650017;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.procedure-detail-button:hover {
+  text-decoration: underline;
+}
+
+.arrow {
+  text-decoration: none;
+}
+
+/* ============================= */
+/* RESPONSIVE CATÁLOGO */
+/* ============================= */
+
+@media (max-width: 1100px) {
+  .catalog-hero {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .catalog-search {
+    max-width: 100%;
+  }
+
+  .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 780px) {
+  .catalog-container {
+    padding: 28px 20px 60px;
+  }
+
+  .catalog-hero {
+    padding: 28px;
+  }
+
+  .catalog-hero h1 {
+    font-size: 28px;
+  }
+
+  .catalog-hero p {
+    font-size: 15px;
+  }
+
+  .catalog-tabs button {
+    flex: 1;
+    min-width: 130px;
+  }
+
+  .catalog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .procedure-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalog-container {
+    padding: 22px 14px 50px;
+  }
+
+  .catalog-hero {
+    padding: 22px;
+  }
+
+  .catalog-search input {
+    font-size: 15px;
+  }
+
+  .procedure-meta {
+    flex-direction: column;
+  }
+}
