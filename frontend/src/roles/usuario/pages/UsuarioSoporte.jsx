@@ -137,10 +137,20 @@ function UsuarioSoporte() {
             </a>
           </div>
 
-          <div className="map-placeholder">
-            <span>UNSAAC - CUSCO</span>
-            <small>Mapa del campus universitario</small>
-          </div>
+          <div className="soporte-map-box">
+  <img
+    src="/images/mapa-unsaac.jpg"
+    alt="Mapa del campus universitario UNSAAC"
+  />
+
+  <div className="soporte-map-label">
+    <strong>UNSAAC - CUSCO</strong>
+    <span>Mapa del campus universitario</span>
+  </div>
+</div>
+        
+        
+        
         </article>
 
         <aside className="not-found-panel">

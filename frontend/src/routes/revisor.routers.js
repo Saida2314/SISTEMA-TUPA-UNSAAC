@@ -6,6 +6,7 @@ const {
   obtenerDetalleSolicitudRevisor,
   cambiarEstadoSolicitud,
   observarSolicitud,
+  aprobarSolicitud,
   rechazarSolicitud,
   derivarSolicitud,
   verDocumentoSolicitud
@@ -19,6 +20,7 @@ router.get('/solicitudes/:id_solicitud', obtenerDetalleSolicitudRevisor);
 
 router.put('/solicitudes/:id_solicitud/estado', cambiarEstadoSolicitud);
 router.post('/solicitudes/:id_solicitud/observar', observarSolicitud);
+router.post('/solicitudes/:id_solicitud/aprobar', aprobarSolicitud);
 router.post('/solicitudes/:id_solicitud/rechazar', rechazarSolicitud);
 router.post('/solicitudes/:id_solicitud/derivar', derivarSolicitud);
 

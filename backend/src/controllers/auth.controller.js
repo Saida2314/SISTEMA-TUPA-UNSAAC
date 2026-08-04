@@ -1,8 +1,7 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const { poolPromise, sql } = require("../config/db");
-require("dotenv").config();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { sql, poolPromise } = require('../config/db');
 
 function validarCorreoInstitucional(correo) {
   return /^[a-zA-Z0-9._%+-]+@unsaac\.edu\.pe$/.test(correo);
@@ -13,33 +12,220 @@ function validarDni(dni) {
 }
 
 function validarPasswordSegura(password) {
-  /*
-    Mínimo 8 caracteres,
-    al menos una mayúscula,
-    al menos una minúscula,
-    al menos un número,
-    al menos un símbolo.
-  */
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password);
 }
 
-async function login(req, res) {
-  try {
-    const { correo, password, rolSeleccionado } = req.body;
+function generarCodigoUsuario() {
+  const anio = new Date().getFullYear().toString().slice(-2);
+  const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let bloque = '';
 
-    if (!correo || !password) {
+  for (let i = 0; i < 6; i++) {
+    bloque += caracteres[Math.floor(Math.random() * caracteres.length)];
+  }
+
+  return `USU-${anio}-${bloque}`;
+}
+
+async function generarCodigoUsuarioUnico(pool) {
+  let codigo = generarCodigoUsuario();
+  let existe = true;
+
+  while (existe) {
+    const resultado = await pool.request()
+      .input('codigo_usuario', sql.NVarChar, codigo)
+      .query(`
+        SELECT id_usuario
+        FROM usuarios
+        WHERE codigo_usuario = @codigo_usuario
+      `);
+
+    if (resultado.recordset.length === 0) {
+      existe = false;
+    } else {
+      codigo = generarCodigoUsuario();
+    }
+  }
+
+  return codigo;
+}
+
+async function obtenerIdRol(pool, nombreRol) {
+  const resultado = await pool.request()
+    .input('nombre', sql.NVarChar, nombreRol)
+    .query(`
+      SELECT id_rol
+      FROM roles
+      WHERE nombre = @nombre
+    `);
+
+  if (resultado.recordset.length === 0) {
+    return null;
+  }
+
+  return resultado.recordset[0].id_rol;
+}
+
+function crearToken(usuario) {
+  return jwt.sign(
+    {
+      id_usuario: usuario.id_usuario,
+      correo: usuario.correo,
+      rol: usuario.rol
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES || '8h'
+    }
+  );
+}
+
+async function registrar(req, res) {
+  try {
+    const {
+      nombres,
+      apellidos,
+      dni,
+      correo,
+      password
+    } = req.body;
+
+    if (!nombres || !apellidos || !dni || !correo || !password) {
       return res.status(400).json({
-        mensaje: "Correo y contraseña son obligatorios"
+        mensaje: 'Todos los campos son obligatorios.'
+      });
+    }
+
+    if (nombres.trim().length < 2) {
+      return res.status(400).json({
+        mensaje: 'El nombre debe tener al menos 2 caracteres.'
+      });
+    }
+
+    if (apellidos.trim().length < 2) {
+      return res.status(400).json({
+        mensaje: 'El apellido debe tener al menos 2 caracteres.'
+      });
+    }
+
+    if (!validarDni(dni.trim())) {
+      return res.status(400).json({
+        mensaje: 'El DNI debe tener exactamente 8 dígitos numéricos.'
+      });
+    }
+
+    if (!validarCorreoInstitucional(correo.trim())) {
+      return res.status(400).json({
+        mensaje: 'Debe usar un correo institucional válido: usuario@unsaac.edu.pe'
+      });
+    }
+
+    if (!validarPasswordSegura(password)) {
+      return res.status(400).json({
+        mensaje: 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.'
       });
     }
 
     const pool = await poolPromise;
 
-    const result = await pool.request()
-      .input("correo", sql.NVarChar, correo)
+    const correoNormalizado = correo.trim().toLowerCase();
+
+    const usuarioExistente = await pool.request()
+      .input('correo', sql.NVarChar, correoNormalizado)
+      .input('dni', sql.NVarChar, dni.trim())
       .query(`
-        SELECT 
+        SELECT id_usuario
+        FROM usuarios
+        WHERE correo = @correo OR dni = @dni
+      `);
+
+    if (usuarioExistente.recordset.length > 0) {
+      return res.status(409).json({
+        mensaje: 'Ya existe un usuario con ese correo o DNI.'
+      });
+    }
+
+    const idRolUsuario = await obtenerIdRol(pool, 'USUARIO');
+
+    if (!idRolUsuario) {
+      return res.status(500).json({
+        mensaje: 'No existe el rol USUARIO en la base de datos.'
+      });
+    }
+
+    const codigoUsuario = await generarCodigoUsuarioUnico(pool);
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await pool.request()
+      .input('codigo_usuario', sql.NVarChar, codigoUsuario)
+      .input('id_rol', sql.Int, idRolUsuario)
+      .input('nombres', sql.NVarChar, nombres.trim())
+      .input('apellidos', sql.NVarChar, apellidos.trim())
+      .input('dni', sql.NVarChar, dni.trim())
+      .input('correo', sql.NVarChar, correoNormalizado)
+      .input('password_hash', sql.NVarChar, passwordHash)
+      .query(`
+        INSERT INTO usuarios (
+          codigo_usuario,
+          id_rol,
+          nombres,
+          apellidos,
+          dni,
+          correo,
+          password_hash,
+          estado
+        )
+        VALUES (
+          @codigo_usuario,
+          @id_rol,
+          @nombres,
+          @apellidos,
+          @dni,
+          @correo,
+          @password_hash,
+          'ACTIVO'
+        )
+      `);
+
+    return res.status(201).json({
+      mensaje: 'Usuario registrado correctamente.',
+      codigo_usuario: codigoUsuario
+    });
+  } catch (error) {
+    console.error('Error al registrar usuario:');
+    console.error(error);
+
+    return res.status(500).json({
+      mensaje: 'Error al registrar usuario',
+      detalle: error.message
+    });
+  }
+}
+
+async function login(req, res) {
+  try {
+    const {
+      correo,
+      password,
+      rolSeleccionado
+    } = req.body;
+
+    if (!correo || !password || !rolSeleccionado) {
+      return res.status(400).json({
+        mensaje: 'Debe ingresar correo, contraseña y tipo de usuario.'
+      });
+    }
+
+    const pool = await poolPromise;
+
+    const correoNormalizado = correo.trim().toLowerCase();
+
+    const resultado = await pool.request()
+      .input('correo', sql.NVarChar, correoNormalizado)
+      .query(`
+        SELECT
           u.id_usuario,
+          u.codigo_usuario,
           u.nombres,
           u.apellidos,
           u.dni,
@@ -52,267 +238,113 @@ async function login(req, res) {
         WHERE u.correo = @correo
       `);
 
-    if (result.recordset.length === 0) {
+    if (resultado.recordset.length === 0) {
       return res.status(401).json({
-        mensaje: "Credenciales incorrectas"
+        mensaje: 'Correo o contraseña incorrectos.'
       });
     }
 
-    const usuario = result.recordset[0];
+    const usuario = resultado.recordset[0];
 
-    if (usuario.estado !== "ACTIVO") {
+    if (usuario.estado !== 'ACTIVO') {
       return res.status(403).json({
-        mensaje: "La cuenta no está activa"
+        mensaje: 'La cuenta no está activa.'
       });
     }
 
-    const passwordCorrecto = await bcrypt.compare(
-      password,
-      usuario.password_hash
-    );
+    if (usuario.rol !== rolSeleccionado) {
+      return res.status(403).json({
+        mensaje: `La cuenta no corresponde al rol seleccionado. Rol registrado: ${usuario.rol}`
+      });
+    }
 
-    if (!passwordCorrecto) {
+    const passwordValido = await bcrypt.compare(password, usuario.password_hash);
+
+    if (!passwordValido) {
       return res.status(401).json({
-        mensaje: "Credenciales incorrectas"
-      });
-    }  
-    if (rolSeleccionado === "REVISOR" && usuario.rol !== "REVISOR") {
-      return res.status(403).json({
-      mensaje: "El correo ingresado no corresponde al rol Revisor. Seleccione el rol correcto e intente nuevamente."
+        mensaje: 'Correo o contraseña incorrectos.'
       });
     }
-
-    if (
-      rolSeleccionado === "ADMIN" &&
-      usuario.rol !== "ADMIN_GENERAL" &&
-      usuario.rol !== "ADMIN_AREA"
-      ) {
-      return res.status(403).json({
-      mensaje: "El correo ingresado no corresponde al rol Administrador. Seleccione el rol correcto e intente nuevamente."
-    });
-    }      
-
-    const token = jwt.sign(
-      {
-        id_usuario: usuario.id_usuario,
-        correo: usuario.correo,
-        rol: usuario.rol
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRES
-      }
-    );
 
     await pool.request()
-      .input("id_usuario", sql.Int, usuario.id_usuario)
+      .input('id_usuario', sql.Int, usuario.id_usuario)
       .query(`
         UPDATE usuarios
         SET ultimo_acceso = SYSDATETIME()
         WHERE id_usuario = @id_usuario
       `);
 
+    const usuarioRespuesta = {
+      id_usuario: usuario.id_usuario,
+      codigo_usuario: usuario.codigo_usuario,
+      nombres: usuario.nombres,
+      apellidos: usuario.apellidos,
+      dni: usuario.dni,
+      correo: usuario.correo,
+      rol: usuario.rol,
+      estado: usuario.estado
+    };
+
+    const token = crearToken(usuarioRespuesta);
+
     return res.json({
-      mensaje: "Inicio de sesión correcto",
+      mensaje: 'Inicio de sesión correcto.',
       token,
-      usuario: {
-        id_usuario: usuario.id_usuario,
-        nombres: usuario.nombres,
-        apellidos: usuario.apellidos,
-        dni: usuario.dni,
-        correo: usuario.correo,
-        rol: usuario.rol
-      }
+      usuario: usuarioRespuesta
     });
-
   } catch (error) {
+    console.error('Error al iniciar sesión:');
     console.error(error);
 
     return res.status(500).json({
-      mensaje: "Error al iniciar sesión"
+      mensaje: 'Error interno al iniciar sesión.',
+      detalle: error.message
     });
   }
 }
 
-async function registrarUsuario(req, res) {
-  try {
-    const {
-      nombres,
-      apellidos,
-      dni,
-      correo,
-      password
-    } = req.body;
-
-    if (!nombres || !apellidos || !dni || !correo || !password) {
-      return res.status(400).json({
-        mensaje: "Todos los campos son obligatorios"
-      });
-    }
-
-    if (nombres.trim().length < 2) {
-      return res.status(400).json({
-        mensaje: "El nombre debe tener al menos 2 caracteres"
-      });
-    }
-
-    if (apellidos.trim().length < 2) {
-      return res.status(400).json({
-        mensaje: "El apellido debe tener al menos 2 caracteres"
-      });
-    }
-
-    if (!validarDni(dni)) {
-      return res.status(400).json({
-        mensaje: "El DNI debe tener exactamente 8 dígitos numéricos"
-      });
-    }
-
-    if (!validarCorreoInstitucional(correo)) {
-      return res.status(400).json({
-        mensaje: "Debe usar un correo institucional válido: usuario@unsaac.edu.pe"
-      });
-    }
-
-    if (!validarPasswordSegura(password)) {
-      return res.status(400).json({
-        mensaje: "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo"
-      });
-    }
-
-    const pool = await poolPromise;
-
-    const existe = await pool.request()
-      .input("correo", sql.NVarChar, correo.trim().toLowerCase())
-      .input("dni", sql.NVarChar, dni.trim())
-      .query(`
-        SELECT id_usuario
-        FROM usuarios
-        WHERE correo = @correo OR dni = @dni
-      `);
-
-    if (existe.recordset.length > 0) {
-      return res.status(409).json({
-        mensaje: "Ya existe un usuario con ese correo o DNI"
-      });
-    }
-
-    const rolResult = await pool.request()
-      .query(`
-        SELECT id_rol
-        FROM roles
-        WHERE nombre = 'USUARIO'
-      `);
-
-    if (rolResult.recordset.length === 0) {
-      return res.status(500).json({
-        mensaje: "No existe el rol USUARIO en la base de datos"
-      });
-    }
-
-    const idRolUsuario = rolResult.recordset[0].id_rol;
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    await pool.request()
-      .input("id_rol", sql.Int, idRolUsuario)
-      .input("nombres", sql.NVarChar, nombres.trim())
-      .input("apellidos", sql.NVarChar, apellidos.trim())
-      .input("dni", sql.NVarChar, dni.trim())
-      .input("correo", sql.NVarChar, correo.trim().toLowerCase())
-      .input("password_hash", sql.NVarChar, passwordHash)
-      .query(`
-        INSERT INTO usuarios (
-          id_rol,
-          nombres,
-          apellidos,
-          dni,
-          correo,
-          password_hash,
-          estado
-        )
-        VALUES (
-          @id_rol,
-          @nombres,
-          @apellidos,
-          @dni,
-          @correo,
-          @password_hash,
-          'ACTIVO'
-        )
-      `);
-
-    return res.status(201).json({
-      mensaje: "Usuario registrado correctamente"
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al registrar usuario"
-    });
-  }
-}
-
-async function solicitarRecuperacionPassword(req, res) {
+async function recuperarPassword(req, res) {
   try {
     const { correo } = req.body;
 
     if (!correo) {
       return res.status(400).json({
-        mensaje: "El correo es obligatorio"
+        mensaje: 'Debe ingresar su correo institucional.'
       });
     }
 
-    const mensajeGenerico = "Si el correo está registrado, se enviará un enlace de recuperación.";
-
     const pool = await poolPromise;
 
-    const usuarioResult = await pool.request()
-      .input("correo", sql.NVarChar, correo.trim().toLowerCase())
+    const correoNormalizado = correo.trim().toLowerCase();
+
+    const usuarioResultado = await pool.request()
+      .input('correo', sql.NVarChar, correoNormalizado)
       .query(`
-        SELECT id_usuario, correo, estado
+        SELECT id_usuario, correo
         FROM usuarios
         WHERE correo = @correo
       `);
 
-    /*
-      Importante:
-      No revelamos si el correo existe o no.
-      Esto evita que alguien pruebe correos para saber cuáles están registrados.
-    */
-    if (usuarioResult.recordset.length === 0) {
+    if (usuarioResultado.recordset.length === 0) {
       return res.json({
-        mensaje: mensajeGenerico
+        mensaje: 'Si el correo está registrado, se enviarán las instrucciones de recuperación.'
       });
     }
 
-    const usuario = usuarioResult.recordset[0];
+    const usuario = usuarioResultado.recordset[0];
 
-    if (usuario.estado !== "ACTIVO") {
-      return res.json({
-        mensaje: mensajeGenerico
-      });
-    }
-
-    const token = crypto.randomBytes(32).toString("hex");
-
+    const tokenPlano = crypto.randomBytes(32).toString('hex');
     const tokenHash = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+      .createHash('sha256')
+      .update(tokenPlano)
+      .digest('hex');
+
+    const fechaExpiracion = new Date(Date.now() + 1000 * 60 * 30);
 
     await pool.request()
-      .input("id_usuario", sql.Int, usuario.id_usuario)
-      .query(`
-        UPDATE recuperacion_password
-        SET usado = 1
-        WHERE id_usuario = @id_usuario AND usado = 0
-      `);
-
-    await pool.request()
-      .input("id_usuario", sql.Int, usuario.id_usuario)
-      .input("token_hash", sql.NVarChar, tokenHash)
+      .input('id_usuario', sql.Int, usuario.id_usuario)
+      .input('token_hash', sql.NVarChar, tokenHash)
+      .input('fecha_expiracion', sql.DateTime2, fechaExpiracion)
       .query(`
         INSERT INTO recuperacion_password (
           id_usuario,
@@ -323,90 +355,87 @@ async function solicitarRecuperacionPassword(req, res) {
         VALUES (
           @id_usuario,
           @token_hash,
-          DATEADD(MINUTE, 30, SYSDATETIME()),
+          @fecha_expiracion,
           0
         )
       `);
 
-    const linkRecuperacion = `http://localhost:5173/restablecer-password/${token}`;
-
     return res.json({
-      mensaje: mensajeGenerico,
-      linkRecuperacion
+      mensaje: 'Si el correo está registrado, se enviarán las instrucciones de recuperación.',
+      token_prueba: tokenPlano
     });
-
   } catch (error) {
+    console.error('Error en recuperación de contraseña:');
     console.error(error);
 
     return res.status(500).json({
-      mensaje: "Error al solicitar recuperación de contraseña"
+      mensaje: 'Error interno al solicitar recuperación de contraseña.',
+      detalle: error.message
     });
   }
 }
 
 async function restablecerPassword(req, res) {
   try {
-    const { token, nuevaPassword } = req.body;
+    const token = req.params.token || req.body.token;
+    const { password } = req.body;
 
-    if (!token || !nuevaPassword) {
+    if (!token || !password) {
       return res.status(400).json({
-        mensaje: "Token y nueva contraseña son obligatorios"
+        mensaje: 'Debe enviar token y nueva contraseña.'
       });
     }
 
-    if (!validarPasswordSegura(nuevaPassword)) {
+    if (!validarPasswordSegura(password)) {
       return res.status(400).json({
-        mensaje: "La nueva contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo"
+        mensaje: 'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.'
       });
     }
 
     const tokenHash = crypto
-      .createHash("sha256")
+      .createHash('sha256')
       .update(token)
-      .digest("hex");
+      .digest('hex');
 
     const pool = await poolPromise;
 
-    const recuperacionResult = await pool.request()
-      .input("token_hash", sql.NVarChar, tokenHash)
+    const tokenResultado = await pool.request()
+      .input('token_hash', sql.NVarChar, tokenHash)
       .query(`
-        SELECT 
-          rp.id_recuperacion,
-          rp.id_usuario,
-          rp.fecha_expiracion,
-          rp.usado
-        FROM recuperacion_password rp
-        WHERE rp.token_hash = @token_hash
+        SELECT
+          id_recuperacion,
+          id_usuario,
+          fecha_expiracion,
+          usado
+        FROM recuperacion_password
+        WHERE token_hash = @token_hash
       `);
 
-    if (recuperacionResult.recordset.length === 0) {
+    if (tokenResultado.recordset.length === 0) {
       return res.status(400).json({
-        mensaje: "El enlace de recuperación no es válido"
+        mensaje: 'Token inválido o expirado.'
       });
     }
 
-    const recuperacion = recuperacionResult.recordset[0];
+    const registro = tokenResultado.recordset[0];
 
-    if (recuperacion.usado) {
+    if (registro.usado) {
       return res.status(400).json({
-        mensaje: "Este enlace ya fue utilizado"
+        mensaje: 'Este token ya fue utilizado.'
       });
     }
 
-    const ahora = new Date();
-    const expiracion = new Date(recuperacion.fecha_expiracion);
-
-    if (ahora > expiracion) {
+    if (new Date(registro.fecha_expiracion) < new Date()) {
       return res.status(400).json({
-        mensaje: "El enlace de recuperación ha expirado"
+        mensaje: 'El token ha expirado.'
       });
     }
 
-    const nuevoHash = await bcrypt.hash(nuevaPassword, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     await pool.request()
-      .input("id_usuario", sql.Int, recuperacion.id_usuario)
-      .input("password_hash", sql.NVarChar, nuevoHash)
+      .input('id_usuario', sql.Int, registro.id_usuario)
+      .input('password_hash', sql.NVarChar, passwordHash)
       .query(`
         UPDATE usuarios
         SET password_hash = @password_hash
@@ -414,7 +443,7 @@ async function restablecerPassword(req, res) {
       `);
 
     await pool.request()
-      .input("id_recuperacion", sql.Int, recuperacion.id_recuperacion)
+      .input('id_recuperacion', sql.Int, registro.id_recuperacion)
       .query(`
         UPDATE recuperacion_password
         SET usado = 1
@@ -422,21 +451,27 @@ async function restablecerPassword(req, res) {
       `);
 
     return res.json({
-      mensaje: "Contraseña actualizada correctamente"
+      mensaje: 'Contraseña restablecida correctamente.'
     });
-
   } catch (error) {
+    console.error('Error al restablecer contraseña:');
     console.error(error);
 
     return res.status(500).json({
-      mensaje: "Error al restablecer contraseña"
+      mensaje: 'Error interno al restablecer contraseña.',
+      detalle: error.message
     });
   }
 }
 
 module.exports = {
   login,
-  registrarUsuario,
-  solicitarRecuperacionPassword,
-  restablecerPassword
+  registrar,
+  recuperarPassword,
+  restablecerPassword,
+
+  registrarUsuario: registrar,
+  solicitarRecuperacionPassword: recuperarPassword,
+  recuperarContrasena: recuperarPassword,
+  restablecerContrasena: restablecerPassword
 };

@@ -3027,3 +3027,243 @@
     padding: 12px;
   }
 }
+
+/* =========================================================
+   INICIO USUARIO - MAPA INSTITUCIONAL
+   ========================================================= */
+
+.usuario-dashboard-page {
+  width: 100%;
+}
+
+.usuario-dashboard-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) 430px;
+  gap: 28px;
+  align-items: stretch;
+  margin-bottom: 28px;
+}
+
+.usuario-dashboard-hero > div:first-child {
+  background: #ffffff;
+  border: 1px solid #dec5ca;
+  border-radius: 14px;
+  padding: 30px;
+  box-shadow: 0 14px 32px rgba(75, 0, 20, 0.06);
+}
+
+.usuario-dashboard-hero span {
+  color: #7a001b;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.usuario-dashboard-hero h1 {
+  color: #6b0018;
+  font-size: 34px;
+  margin: 10px 0;
+}
+
+.usuario-dashboard-hero p {
+  color: #5f5255;
+  line-height: 1.6;
+  max-width: 720px;
+  margin: 0;
+}
+
+.usuario-dashboard-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.usuario-dashboard-actions a {
+  border-radius: 9px;
+  padding: 12px 18px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.usuario-dashboard-actions a:first-child {
+  background: #ffad16;
+  color: #6b0018;
+}
+
+.usuario-dashboard-actions a:last-child {
+  border: 2px solid #7a001b;
+  color: #7a001b;
+  background: #ffffff;
+}
+
+.usuario-dashboard-map-card {
+  background: #ffffff;
+  border: 1px solid #dec5ca;
+  border-radius: 14px;
+  box-shadow: 0 14px 32px rgba(75, 0, 20, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 310px;
+}
+
+.usuario-map-header {
+  background: #6b0018;
+  color: #ffffff;
+  padding: 16px 18px;
+  border-bottom: 3px solid #ffad16;
+}
+
+.usuario-map-header strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.usuario-map-header span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  text-transform: none;
+}
+
+.usuario-map-image-box {
+  flex: 1;
+  min-height: 250px;
+  background: #f7f2f3;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.usuario-map-image-box img {
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
+  object-fit: cover;
+  display: block;
+}
+
+.usuario-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.usuario-dashboard-card {
+  background: #ffffff;
+  border: 1px solid #dec5ca;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 14px 32px rgba(75, 0, 20, 0.06);
+}
+
+.usuario-dashboard-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fff0d2;
+  color: #7a001b;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.usuario-dashboard-card h2 {
+  color: #7a001b;
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.usuario-dashboard-card p {
+  color: #5f5255;
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+
+.usuario-dashboard-card a {
+  color: #936500;
+  font-weight: 900;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+@media (max-width: 1120px) {
+  .usuario-dashboard-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .usuario-dashboard-map-card {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 780px) {
+  .usuario-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usuario-dashboard-hero h1 {
+    font-size: 28px;
+  }
+
+  .usuario-dashboard-hero > div:first-child {
+    padding: 24px;
+  }
+}
+
+/* =========================================================
+   SOPORTE USUARIO - IMAGEN MAPA CAMPUS
+   ========================================================= */
+
+.soporte-map-box {
+  position: relative !important;
+  width: 100% !important;
+  min-height: 260px !important;
+  height: 100% !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid #dec5ca !important;
+  background: #f4ecec !important;
+}
+
+.soporte-map-box img {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 260px !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.soporte-map-label {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  padding: 14px 16px !important;
+  background: linear-gradient(
+    to top,
+    rgba(107, 0, 24, 0.92),
+    rgba(107, 0, 24, 0.55),
+    transparent
+  ) !important;
+  color: #ffffff !important;
+}
+
+.soporte-map-label strong {
+  display: block !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+}
+
+.soporte-map-label span {
+  display: block !important;
+  margin-top: 4px !important;
+  font-size: 12px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}

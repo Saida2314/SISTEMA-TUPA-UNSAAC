@@ -550,3 +550,180 @@
     gap: 18px;
   }
 }
+
+/* =========================================================
+   NAVBAR PÚBLICO - BOTONES FORMAL INSTITUCIONAL
+   ========================================================= */
+
+.public-navbar {
+  height: 72px !important;
+  background: #6b0018 !important;
+  border-bottom: 3px solid #ffad16 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  column-gap: 34px !important;
+  padding: 0 34px !important;
+  box-shadow: 0 12px 30px rgba(40, 0, 10, 0.18) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+}
+
+.public-navbar-brand {
+  min-width: 240px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.public-navbar-brand img {
+  width: 42px !important;
+  height: 42px !important;
+  object-fit: contain !important;
+}
+
+.public-navbar-brand strong {
+  display: block !important;
+  color: #ffffff !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.3px !important;
+}
+
+.public-navbar-brand small {
+  display: block !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 11px !important;
+  margin-top: 2px !important;
+  font-weight: 700 !important;
+}
+
+.public-navbar-menu {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 58px !important;
+}
+
+.public-navbar-menu a {
+  color: rgba(255, 255, 255, 0.78) !important;
+  text-decoration: none !important;
+  font-weight: 900 !important;
+  font-size: 15px !important;
+  padding: 27px 0 20px !important;
+  border-bottom: 4px solid transparent !important;
+  transition: 0.2s ease !important;
+}
+
+.public-navbar-menu a:hover,
+.public-navbar-menu a.active {
+  color: #ffffff !important;
+  border-bottom-color: #ffad16 !important;
+}
+
+.public-navbar-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  min-width: fit-content !important;
+}
+
+.public-icon-button {
+  width: 40px !important;
+  height: 40px !important;
+  border: 1px solid rgba(255, 173, 22, 0.62) !important;
+  background: rgba(255, 173, 22, 0.1) !important;
+  color: #ffad16 !important;
+  border-radius: 10px !important;
+  display: grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  transition: 0.2s ease !important;
+  padding: 0 !important;
+}
+
+.public-icon-button:hover {
+  background: #ffad16 !important;
+  color: #6b0018 !important;
+  border-color: #ffad16 !important;
+  transform: translateY(-1px) !important;
+}
+
+.public-bell-icon,
+.public-help-icon {
+  width: 19px !important;
+  height: 19px !important;
+  fill: currentColor !important;
+  display: block !important;
+}
+
+.public-login-button {
+  height: 42px !important;
+  min-width: 96px !important;
+  border-radius: 10px !important;
+  background: #ffad16 !important;
+  color: #6b0018 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 20px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  border: 1px solid #ffad16 !important;
+  box-shadow: 0 10px 20px rgba(255, 173, 22, 0.22) !important;
+  transition: 0.2s ease !important;
+}
+
+.public-login-button:hover {
+  background: #ffffff !important;
+  color: #6b0018 !important;
+  border-color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Oculta posibles emojis/textos anteriores si quedaron estilos viejos */
+.public-navbar-actions > span,
+.public-navbar-actions > em {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+  .public-navbar {
+    height: auto !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 18px !important;
+  }
+
+  .public-navbar-brand {
+    min-width: 0 !important;
+  }
+
+  .public-navbar-menu {
+    justify-content: flex-start !important;
+    gap: 24px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .public-navbar-menu a {
+    padding: 8px 0 !important;
+  }
+
+  .public-navbar-actions {
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .public-navbar-menu {
+    gap: 16px !important;
+  }
+
+  .public-login-button {
+    min-width: auto !important;
+    padding: 0 16px !important;
+  }
+}

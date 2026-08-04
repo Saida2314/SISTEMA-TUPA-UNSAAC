@@ -8,6 +8,9 @@ const solicitudesRoutes = require('./routes/solicitudes.routes');
 const antoniaRoutes = require('./routes/antonia.routes');
 const soporteRoutes = require('./routes/soporte.routes');
 const revisorRoutes = require('./routes/revisor.routes');
+const adminAreaRoutes = require('./routes/adminArea.routes');
+const adminAreaTicketsRoutes = require('./routes/adminAreaTickets.routes');
+const adminGeneralRoutes = require('./routes/adminGeneral.routes');
 
 const app = express();
 
@@ -28,5 +31,9 @@ app.use('/api/antonia', antoniaRoutes);
 app.use('/api/soporte', soporteRoutes);
 
 app.use('/api/revisor', revisorRoutes);
+app.use('/api/admin-area', adminAreaRoutes);
+app.use('/api/admin-area', adminAreaTicketsRoutes);
+app.use('/api/admin-general', adminGeneralRoutes);
+
 
 module.exports = app;

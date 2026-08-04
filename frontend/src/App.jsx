@@ -31,7 +31,17 @@ import UsuarioTicketConversacion from './roles/usuario/pages/UsuarioTicketConver
 
 //revisor
 import RevisorBandeja from './roles/revisor/pages/RevisorBandeja';
+import RevisorExpedienteDetalle from './roles/revisor/pages/RevisorExpedienteDetalle';
+import RevisorDerivacionExitosa from './roles/revisor/pages/RevisorDerivacionExitosa';
+import RevisorDerivarExpediente from './roles/revisor/pages/RevisorDerivarExpediente';
 
+//admin-area
+import AdminAreaSolicitudes from './roles/admin-area/pages/AdminAreaSolicitudes';
+import AdminAreaExpedienteDetalle from './roles/admin-area/pages/AdminAreaExpedienteDetalle';
+import AdminAreaConsultas from './roles/admin-area/pages/AdminAreaConsultas';
+
+import AdminGeneralTramites from './roles/admin-general/pages/AdminGeneralTramites';
+import AdminGeneralUsuarios from './roles/admin-general/pages/AdminGeneralUsuarios';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -166,6 +176,33 @@ function App() {
   }
 />
 
+<Route
+  path="/revisor/solicitudes/:idSolicitud"
+  element={
+    <ProtectedRoute rolPermitido="REVISOR">
+      <RevisorExpedienteDetalle />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/revisor/solicitudes/:idSolicitud/derivar"
+  element={
+    <ProtectedRoute rolPermitido="REVISOR">
+      <RevisorDerivarExpediente />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/revisor/derivacion-exitosa"
+  element={
+    <ProtectedRoute rolPermitido="REVISOR">
+      <RevisorDerivacionExitosa />
+    </ProtectedRoute>
+  }
+/>
+
 
       <Route
         path="/admin-general"
@@ -176,14 +213,184 @@ function App() {
         }
       />
 
-      <Route
-        path="/admin-general/crear-perfil"
-        element={
-          <ProtectedRoute rolPermitido="ADMIN_GENERAL">
-            <CreateProfile />
-          </ProtectedRoute>
-        }
-      />
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/admin-general/tramites"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralTramites />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-general/usuarios"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_GENERAL">
+      <AdminGeneralUsuarios />
+    </ProtectedRoute>
+  }
+/>
 
       <Route
         path="/admin-area"
@@ -193,6 +400,34 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
+<Route
+  path="/admin-area/solicitudes"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_AREA">
+      <AdminAreaSolicitudes />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-area/solicitudes/:idSolicitud"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_AREA">
+      <AdminAreaExpedienteDetalle />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/admin-area/consultas"
+  element={
+    <ProtectedRoute rolPermitido="ADMIN_AREA">
+      <AdminAreaConsultas />
+    </ProtectedRoute>
+  }
+/>
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

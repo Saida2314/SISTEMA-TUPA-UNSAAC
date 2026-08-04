@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 
-function RevisorLayout({ children }) {
+function AdminGeneralLayout({ children }) {
   const navigate = useNavigate();
   const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
 
@@ -11,31 +11,35 @@ function RevisorLayout({ children }) {
   }
 
   return (
-    <div className="revisor-shell">
-      <header className="revisor-topbar">
-        <div className="revisor-brand">
+    <div className="admin-general-shell">
+      <header className="admin-general-topbar">
+        <div className="admin-general-brand">
           <img src="/images/logo-unsaac.png" alt="Logo UNSAAC" />
           <strong>TUPA UNSAAC</strong>
         </div>
 
-        <nav className="revisor-nav">
-          <NavLink to="/revisor" end>
+        <nav className="admin-general-nav">
+          <NavLink to="/admin-general" end>
             Panel
           </NavLink>
 
-          <NavLink to="/revisor/bandeja">
-            Bandeja
+          <NavLink to="/admin-general/tramites">
+            Trámites
+          </NavLink>
+
+          <NavLink to="/admin-general/usuarios">
+            Usuarios
           </NavLink>
         </nav>
 
-        <div className="revisor-actions">
+        <div className="admin-general-actions">
           <button
             type="button"
-            className="revisor-notification-button"
+            className="admin-general-notification-button"
             title="Notificaciones"
           >
             <svg
-              className="revisor-bell-icon"
+              className="admin-general-bell-icon"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
@@ -43,25 +47,25 @@ function RevisorLayout({ children }) {
             </svg>
           </button>
 
-          <div className="revisor-profile">
-            <div className="revisor-avatar">
-              {(usuario?.nombres || 'R').charAt(0).toUpperCase()}
+          <div className="admin-general-profile">
+            <div className="admin-general-avatar">
+              {(usuario?.nombres || 'A').charAt(0).toUpperCase()}
             </div>
 
-            <div className="revisor-profile-text">
-              <strong>{usuario?.nombres || 'Revisor'}</strong>
-              <small>Revisor</small>
+            <div className="admin-general-profile-text">
+              <strong>{usuario?.nombres || 'Administrador'}</strong>
+              <small>Admin General</small>
             </div>
           </div>
 
           <button
             type="button"
-            className="revisor-logout"
+            className="admin-general-logout"
             onClick={cerrarSesion}
             title="Cerrar sesión"
           >
             <svg
-              className="revisor-logout-icon"
+              className="admin-general-logout-icon"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
@@ -74,11 +78,11 @@ function RevisorLayout({ children }) {
         </div>
       </header>
 
-      <main className="revisor-main">
+      <main className="admin-general-main">
         {children}
       </main>
     </div>
   );
 }
 
-export default RevisorLayout;
+export default AdminGeneralLayout;

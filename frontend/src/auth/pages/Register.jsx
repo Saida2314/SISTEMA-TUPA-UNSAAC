@@ -208,7 +208,7 @@ function Register() {
               type="button"
               onClick={() => setMostrarPassword(!mostrarPassword)}
             >
-              {mostrarPassword ? '' : '👁'}
+              {mostrarPassword ? '/' : '👁'}
             </button>
           </div>
 

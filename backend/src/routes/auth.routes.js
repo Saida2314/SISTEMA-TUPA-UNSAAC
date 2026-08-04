@@ -1,16 +1,18 @@
-const express = require("express");
-const router = express.Router();
+const express = require('express');
 
 const {
   login,
-  registrarUsuario,
-  solicitarRecuperacionPassword,
+  registrar,
+  recuperarPassword,
   restablecerPassword
-} = require("../controllers/auth.controller");
+} = require('../controllers/auth.controller');
 
-router.post("/login", login);
-router.post("/registro", registrarUsuario);
-router.post("/recuperar-password", solicitarRecuperacionPassword);
-router.post("/restablecer-password", restablecerPassword);
+const router = express.Router();
+
+router.post('/login', login);
+router.post('/registro', registrar);
+router.post('/recuperar-password', recuperarPassword);
+router.post('/restablecer-password', restablecerPassword);
+router.post('/restablecer-password/:token', restablecerPassword);
 
 module.exports = router;

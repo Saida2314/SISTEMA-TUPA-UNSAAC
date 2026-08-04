@@ -19,12 +19,12 @@ function generarCodigoSimple(prefijo) {
   return `${prefijo}-${anio}-${bloque}`;
 }
 
-function generarCodigoObservacion() {
-  return generarCodigoSimple('OBS');
+function generarCodigoArchivoArea() {
+  return generarCodigoSimple('ARA');
 }
 
-function generarCodigoDerivacion() {
-  return generarCodigoSimple('DER');
+function generarCodigoMensajeArea() {
+  return generarCodigoSimple('MAR');
 }
 
 async function generarCodigoUnico(pool, tabla, columna, generador) {
@@ -82,37 +82,47 @@ async function registrarHistorial(pool, idSolicitud, estado, descripcion, respon
     `);
 }
 
-async function obtenerResumenRevisor(req, res) {
+async function obtenerResumenAdminArea(req, res) {
   try {
     const pool = await poolPromise;
 
     const resumenResultado = await pool.request().query(`
       SELECT
         COUNT(*) AS total,
-        SUM(CASE WHEN estado = 'REGISTRADO' THEN 1 ELSE 0 END) AS registrados,
-        SUM(CASE WHEN estado = 'EN_REVISION' THEN 1 ELSE 0 END) AS en_revision,
-        SUM(CASE WHEN estado = 'OBSERVADO' THEN 1 ELSE 0 END) AS observados,
-        SUM(CASE WHEN estado = 'RECHAZADO' THEN 1 ELSE 0 END) AS rechazados,
         SUM(CASE WHEN estado = 'DERIVADO' THEN 1 ELSE 0 END) AS derivados,
-        SUM(CASE WHEN estado = 'FINALIZADO' THEN 1 ELSE 0 END) AS finalizados
+        SUM(CASE WHEN estado = 'EN_VALIDACION_AREA' THEN 1 ELSE 0 END) AS en_validacion,
+        SUM(CASE WHEN estado = 'FINALIZADO' THEN 1 ELSE 0 END) AS finalizados,
+        SUM(CASE WHEN estado = 'RECHAZADO' THEN 1 ELSE 0 END) AS rechazados
       FROM solicitudes
-      WHERE estado <> 'BORRADOR'
+      WHERE estado IN ('DERIVADO', 'EN_VALIDACION_AREA', 'FINALIZADO', 'RECHAZADO')
     `);
 
     const recientesResultado = await pool.request().query(`
-      SELECT TOP 5
+      SELECT TOP 6
         s.id_solicitud,
         s.codigo_solicitud,
         s.estado,
         s.fecha_envio,
         t.nombre AS tramite,
+        c.nombre AS categoria,
         u.nombres,
-        u.apellidos
+        u.apellidos,
+        d.oficina_destino,
+        d.fecha_derivacion
       FROM solicitudes s
       INNER JOIN tramites t ON s.id_tramite = t.id_tramite
+      INNER JOIN categorias_tramite c ON t.id_categoria = c.id_categoria
       INNER JOIN usuarios u ON s.id_usuario = u.id_usuario
-      WHERE s.estado <> 'BORRADOR'
-      ORDER BY s.fecha_envio DESC
+      OUTER APPLY (
+        SELECT TOP 1
+          oficina_destino,
+          fecha_derivacion
+        FROM derivaciones_solicitud
+        WHERE id_solicitud = s.id_solicitud
+        ORDER BY fecha_derivacion DESC
+      ) d
+      WHERE s.estado IN ('DERIVADO', 'EN_VALIDACION_AREA', 'FINALIZADO', 'RECHAZADO')
+      ORDER BY ISNULL(d.fecha_derivacion, s.fecha_envio) DESC
     `);
 
     return res.json({
@@ -120,15 +130,15 @@ async function obtenerResumenRevisor(req, res) {
       recientes: recientesResultado.recordset
     });
   } catch (error) {
-    console.error('Error al obtener resumen del revisor:', error);
+    console.error('Error al obtener resumen Admin Área:', error);
 
     return res.status(500).json({
-      mensaje: 'Error interno al obtener el resumen del revisor.'
+      mensaje: 'Error interno al obtener el resumen del Admin de Área.'
     });
   }
 }
 
-async function listarSolicitudesRevisor(req, res) {
+async function listarSolicitudesAdminArea(req, res) {
   try {
     const { estado, buscar } = req.query;
 
@@ -141,9 +151,6 @@ async function listarSolicitudesRevisor(req, res) {
         s.estado,
         s.fecha_envio,
         s.costo_total,
-        s.codigo_pago,
-        s.metodo_pago,
-        s.clave_voucher,
 
         t.id_tramite,
         t.nombre AS tramite,
@@ -161,6 +168,12 @@ async function listarSolicitudesRevisor(req, res) {
         u.dni,
         u.correo,
 
+        d.codigo_derivacion,
+        d.oficina_destino,
+        d.motivo AS motivo_derivacion,
+        d.responsable AS responsable_derivacion,
+        d.fecha_derivacion,
+
         (
           SELECT COUNT(*)
           FROM documentos_solicitud ds
@@ -169,16 +182,26 @@ async function listarSolicitudesRevisor(req, res) {
 
         (
           SELECT COUNT(*)
-          FROM documentos_solicitud ds
-          WHERE ds.id_solicitud = s.id_solicitud
-            AND ds.tipo_documento = 'voucher'
-        ) AS total_vouchers
+          FROM archivos_admin_area aa
+          WHERE aa.id_solicitud = s.id_solicitud
+        ) AS total_archivos_area
 
       FROM solicitudes s
       INNER JOIN tramites t ON s.id_tramite = t.id_tramite
       INNER JOIN categorias_tramite c ON t.id_categoria = c.id_categoria
       INNER JOIN usuarios u ON s.id_usuario = u.id_usuario
-      WHERE s.estado <> 'BORRADOR'
+      OUTER APPLY (
+        SELECT TOP 1
+          codigo_derivacion,
+          oficina_destino,
+          motivo,
+          responsable,
+          fecha_derivacion
+        FROM derivaciones_solicitud
+        WHERE id_solicitud = s.id_solicitud
+        ORDER BY fecha_derivacion DESC
+      ) d
+      WHERE s.estado IN ('DERIVADO', 'EN_VALIDACION_AREA', 'FINALIZADO', 'RECHAZADO')
     `;
 
     const request = pool.request();
@@ -193,12 +216,11 @@ async function listarSolicitudesRevisor(req, res) {
         AND (
           s.codigo_solicitud COLLATE Modern_Spanish_CI_AI LIKE @buscar
           OR t.nombre COLLATE Modern_Spanish_CI_AI LIKE @buscar
-          OR t.codigo COLLATE Modern_Spanish_CI_AI LIKE @buscar
           OR c.nombre COLLATE Modern_Spanish_CI_AI LIKE @buscar
           OR u.nombres COLLATE Modern_Spanish_CI_AI LIKE @buscar
           OR u.apellidos COLLATE Modern_Spanish_CI_AI LIKE @buscar
           OR u.dni LIKE @buscar
-          OR u.correo COLLATE Modern_Spanish_CI_AI LIKE @buscar
+          OR d.oficina_destino COLLATE Modern_Spanish_CI_AI LIKE @buscar
         )
       `;
 
@@ -206,32 +228,30 @@ async function listarSolicitudesRevisor(req, res) {
     }
 
     consulta += `
-      ORDER BY 
-        CASE 
-          WHEN s.estado = 'REGISTRADO' THEN 1
-          WHEN s.estado = 'EN_REVISION' THEN 2
-          WHEN s.estado = 'OBSERVADO' THEN 3
-          WHEN s.estado = 'DERIVADO' THEN 4
-          WHEN s.estado = 'RECHAZADO' THEN 5
-          WHEN s.estado = 'FINALIZADO' THEN 6
-          ELSE 7
+      ORDER BY
+        CASE
+          WHEN s.estado = 'DERIVADO' THEN 1
+          WHEN s.estado = 'EN_VALIDACION_AREA' THEN 2
+          WHEN s.estado = 'FINALIZADO' THEN 3
+          WHEN s.estado = 'RECHAZADO' THEN 4
+          ELSE 5
         END,
-        s.fecha_envio DESC
+        ISNULL(d.fecha_derivacion, s.fecha_envio) DESC
     `;
 
     const resultado = await request.query(consulta);
 
     return res.json(resultado.recordset);
   } catch (error) {
-    console.error('Error al listar solicitudes del revisor:', error);
+    console.error('Error al listar solicitudes Admin Área:', error);
 
     return res.status(500).json({
-      mensaje: 'Error interno al listar solicitudes reales para revisión.'
+      mensaje: 'Error interno al listar solicitudes derivadas.'
     });
   }
 }
 
-async function obtenerDetalleSolicitudRevisor(req, res) {
+async function obtenerDetalleSolicitudAdminArea(req, res) {
   try {
     const { id_solicitud } = req.params;
 
@@ -240,7 +260,7 @@ async function obtenerDetalleSolicitudRevisor(req, res) {
     const solicitudResultado = await pool.request()
       .input('id_solicitud', sql.Int, Number(id_solicitud))
       .query(`
-        SELECT 
+        SELECT
           s.id_solicitud,
           s.codigo_solicitud,
           s.estado,
@@ -265,18 +285,35 @@ async function obtenerDetalleSolicitudRevisor(req, res) {
           u.nombres,
           u.apellidos,
           u.dni,
-          u.correo
+          u.correo,
+
+          d.codigo_derivacion,
+          d.oficina_destino,
+          d.motivo AS motivo_derivacion,
+          d.responsable AS responsable_derivacion,
+          d.fecha_derivacion
         FROM solicitudes s
         INNER JOIN tramites t ON s.id_tramite = t.id_tramite
         INNER JOIN categorias_tramite c ON t.id_categoria = c.id_categoria
         INNER JOIN usuarios u ON s.id_usuario = u.id_usuario
+        OUTER APPLY (
+          SELECT TOP 1
+            codigo_derivacion,
+            oficina_destino,
+            motivo,
+            responsable,
+            fecha_derivacion
+          FROM derivaciones_solicitud
+          WHERE id_solicitud = s.id_solicitud
+          ORDER BY fecha_derivacion DESC
+        ) d
         WHERE s.id_solicitud = @id_solicitud
-          AND s.estado <> 'BORRADOR'
+          AND s.estado IN ('DERIVADO', 'EN_VALIDACION_AREA', 'FINALIZADO', 'RECHAZADO')
       `);
 
     if (solicitudResultado.recordset.length === 0) {
       return res.status(404).json({
-        mensaje: 'Solicitud no encontrada o aún no enviada por el usuario.'
+        mensaje: 'Solicitud derivada no encontrada.'
       });
     }
 
@@ -293,12 +330,42 @@ async function obtenerDetalleSolicitudRevisor(req, res) {
           fecha_subida
         FROM documentos_solicitud
         WHERE id_solicitud = @id_solicitud
-        ORDER BY 
-          CASE 
-            WHEN tipo_documento = 'voucher' THEN 2
-            ELSE 1
-          END,
+        ORDER BY
+          CASE WHEN tipo_documento = 'voucher' THEN 2 ELSE 1 END,
           fecha_subida ASC
+      `);
+
+    const archivosAreaResultado = await pool.request()
+      .input('id_solicitud', sql.Int, Number(id_solicitud))
+      .query(`
+        SELECT
+          id_archivo_area,
+          codigo_archivo,
+          nombre_original,
+          nombre_archivo,
+          ruta_archivo,
+          tipo_archivo,
+          descripcion,
+          responsable,
+          fecha_subida
+        FROM archivos_admin_area
+        WHERE id_solicitud = @id_solicitud
+        ORDER BY fecha_subida DESC
+      `);
+
+    const mensajesAreaResultado = await pool.request()
+      .input('id_solicitud', sql.Int, Number(id_solicitud))
+      .query(`
+        SELECT
+          id_mensaje_area,
+          codigo_mensaje,
+          mensaje,
+          tipo_mensaje,
+          responsable,
+          fecha_mensaje
+        FROM mensajes_admin_area
+        WHERE id_solicitud = @id_solicitud
+        ORDER BY fecha_mensaje DESC
       `);
 
     const historialResultado = await pool.request()
@@ -324,8 +391,7 @@ async function obtenerDetalleSolicitudRevisor(req, res) {
           tipo_observacion,
           estado,
           responsable,
-          fecha_observacion,
-          fecha_subsanacion
+          fecha_observacion
         FROM observaciones_solicitud
         WHERE id_solicitud = @id_solicitud
         ORDER BY fecha_observacion DESC
@@ -349,108 +415,83 @@ async function obtenerDetalleSolicitudRevisor(req, res) {
     return res.json({
       solicitud: solicitudResultado.recordset[0],
       documentos: documentosResultado.recordset,
+      archivosArea: archivosAreaResultado.recordset,
+      mensajesArea: mensajesAreaResultado.recordset,
       historial: historialResultado.recordset,
       observaciones: observacionesResultado.recordset,
       derivaciones: derivacionesResultado.recordset
     });
   } catch (error) {
-    console.error('Error al obtener detalle del expediente:', error);
+    console.error('Error al obtener detalle Admin Área:', error);
 
     return res.status(500).json({
-      mensaje: 'Error interno al obtener el expediente real desde la base de datos.'
+      mensaje: 'Error interno al obtener el expediente derivado.'
     });
   }
 }
 
-async function cambiarEstadoSolicitud(req, res) {
+async function tomarEnValidacionArea(req, res) {
   try {
     const { id_solicitud } = req.params;
-
-    const {
-      nuevo_estado,
-      descripcion,
-      responsable
-    } = req.body;
-
-    if (!nuevo_estado || !descripcion) {
-      return res.status(400).json({
-        mensaje: 'Debe enviar el nuevo estado y la descripción.'
-      });
-    }
-
-    const estadosPermitidos = [
-      'EN_REVISION',
-      'OBSERVADO',
-      'RECHAZADO',
-      'DERIVADO'
-    ];
-
-    if (!estadosPermitidos.includes(nuevo_estado)) {
-      return res.status(400).json({
-        mensaje: 'Estado no válido para el revisor.'
-      });
-    }
+    const { responsable } = req.body;
 
     const pool = await poolPromise;
 
-    const solicitudResultado = await pool.request()
+    const resultado = await pool.request()
       .input('id_solicitud', sql.Int, Number(id_solicitud))
       .query(`
-        SELECT id_solicitud, codigo_solicitud, estado
+        SELECT id_solicitud, estado
         FROM solicitudes
         WHERE id_solicitud = @id_solicitud
-          AND estado <> 'BORRADOR'
+          AND estado = 'DERIVADO'
       `);
 
-    if (solicitudResultado.recordset.length === 0) {
-      return res.status(404).json({
-        mensaje: 'Solicitud no encontrada o aún no enviada.'
+    if (resultado.recordset.length === 0) {
+      return res.status(400).json({
+        mensaje: 'Solo se pueden tomar en validación las solicitudes derivadas.'
       });
     }
 
     await pool.request()
       .input('id_solicitud', sql.Int, Number(id_solicitud))
-      .input('estado', sql.NVarChar, nuevo_estado)
       .query(`
         UPDATE solicitudes
-        SET estado = @estado
+        SET estado = 'EN_VALIDACION_AREA'
         WHERE id_solicitud = @id_solicitud
       `);
 
     await registrarHistorial(
       pool,
       Number(id_solicitud),
-      nuevo_estado,
-      descripcion,
-      responsable || 'Revisor'
+      'EN_VALIDACION_AREA',
+      'El Admin de Área tomó el expediente para validación final.',
+      responsable || 'Admin de Área'
     );
 
     return res.json({
-      mensaje: 'Estado actualizado correctamente.',
-      estado: nuevo_estado
+      mensaje: 'El expediente fue tomado en validación de área.',
+      estado: 'EN_VALIDACION_AREA'
     });
   } catch (error) {
-    console.error('Error al cambiar estado:', error);
+    console.error('Error al tomar en validación:', error);
 
     return res.status(500).json({
-      mensaje: 'Error interno al actualizar el estado.'
+      mensaje: 'Error interno al tomar el expediente en validación.'
     });
   }
 }
 
-async function observarSolicitud(req, res) {
+async function subirArchivoArea(req, res) {
   try {
     const { id_solicitud } = req.params;
-
     const {
       descripcion,
-      tipo_observacion,
       responsable
     } = req.body;
 
-    if (!descripcion || descripcion.trim() === '') {
+    if (!req.file) {
       return res.status(400).json({
-        mensaje: 'Debe escribir la observación.'
+        mensaje: 'Debe subir un archivo.'
       });
     }
 
@@ -459,52 +500,55 @@ async function observarSolicitud(req, res) {
     const solicitudResultado = await pool.request()
       .input('id_solicitud', sql.Int, Number(id_solicitud))
       .query(`
-        SELECT id_solicitud
+        SELECT id_solicitud, estado
         FROM solicitudes
         WHERE id_solicitud = @id_solicitud
-          AND estado <> 'BORRADOR'
+          AND estado IN ('DERIVADO', 'EN_VALIDACION_AREA')
       `);
 
     if (solicitudResultado.recordset.length === 0) {
-      return res.status(404).json({
-        mensaje: 'Solicitud no encontrada.'
+      return res.status(400).json({
+        mensaje: 'Solo se pueden subir archivos en expedientes derivados o en validación.'
       });
     }
 
-    const codigoObservacion = await generarCodigoUnico(
+    const codigoArchivo = await generarCodigoUnico(
       pool,
-      'observaciones_solicitud',
-      'codigo_observacion',
-      generarCodigoObservacion
+      'archivos_admin_area',
+      'codigo_archivo',
+      generarCodigoArchivoArea
     );
 
-    await pool.request()
-      .input('id_solicitud', sql.Int, Number(id_solicitud))
-      .query(`
-        UPDATE solicitudes
-        SET estado = 'OBSERVADO'
-        WHERE id_solicitud = @id_solicitud
-      `);
+    const rutaArchivo = String(req.file.path || '').replace(/\\/g, '/');
 
     await pool.request()
-      .input('codigo_observacion', sql.NVarChar, codigoObservacion)
+      .input('codigo_archivo', sql.NVarChar, codigoArchivo)
       .input('id_solicitud', sql.Int, Number(id_solicitud))
-      .input('descripcion', sql.NVarChar, descripcion.trim())
-      .input('tipo_observacion', sql.NVarChar, tipo_observacion || 'DOCUMENTOS')
-      .input('responsable', sql.NVarChar, responsable || 'Revisor')
+      .input('nombre_original', sql.NVarChar, req.file.originalname)
+      .input('nombre_archivo', sql.NVarChar, req.file.filename)
+      .input('ruta_archivo', sql.NVarChar, rutaArchivo)
+      .input('tipo_archivo', sql.NVarChar, 'RESPUESTA_AREA')
+      .input('descripcion', sql.NVarChar, descripcion || 'Archivo adjuntado por el Admin de Área.')
+      .input('responsable', sql.NVarChar, responsable || 'Admin de Área')
       .query(`
-        INSERT INTO observaciones_solicitud (
-          codigo_observacion,
+        INSERT INTO archivos_admin_area (
+          codigo_archivo,
           id_solicitud,
+          nombre_original,
+          nombre_archivo,
+          ruta_archivo,
+          tipo_archivo,
           descripcion,
-          tipo_observacion,
           responsable
         )
         VALUES (
-          @codigo_observacion,
+          @codigo_archivo,
           @id_solicitud,
+          @nombre_original,
+          @nombre_archivo,
+          @ruta_archivo,
+          @tipo_archivo,
           @descripcion,
-          @tipo_observacion,
           @responsable
         )
       `);
@@ -512,26 +556,107 @@ async function observarSolicitud(req, res) {
     await registrarHistorial(
       pool,
       Number(id_solicitud),
-      'OBSERVADO',
-      descripcion.trim(),
-      responsable || 'Revisor'
+      'EN_VALIDACION_AREA',
+      `El Admin de Área adjuntó un archivo: ${req.file.originalname}.`,
+      responsable || 'Admin de Área'
     );
 
     return res.json({
-      mensaje: 'Observación registrada correctamente.',
-      codigo_observacion: codigoObservacion,
-      estado: 'OBSERVADO'
+      mensaje: 'Archivo subido correctamente.',
+      codigo_archivo: codigoArchivo
     });
   } catch (error) {
-    console.error('Error al observar solicitud:', error);
+    console.error('Error al subir archivo de área:', error);
 
     return res.status(500).json({
-      mensaje: 'Error interno al registrar la observación.'
+      mensaje: 'Error interno al subir el archivo del área.'
     });
   }
 }
 
-async function rechazarSolicitud(req, res) {
+async function enviarMensajeRecojo(req, res) {
+  try {
+    const { id_solicitud } = req.params;
+    const {
+      mensaje,
+      responsable
+    } = req.body;
+
+    if (!mensaje || mensaje.trim() === '') {
+      return res.status(400).json({
+        mensaje: 'Debe escribir el mensaje de recojo presencial.'
+      });
+    }
+
+    const pool = await poolPromise;
+
+    const solicitudResultado = await pool.request()
+      .input('id_solicitud', sql.Int, Number(id_solicitud))
+      .query(`
+        SELECT id_solicitud, estado
+        FROM solicitudes
+        WHERE id_solicitud = @id_solicitud
+          AND estado IN ('DERIVADO', 'EN_VALIDACION_AREA', 'FINALIZADO')
+      `);
+
+    if (solicitudResultado.recordset.length === 0) {
+      return res.status(400).json({
+        mensaje: 'No se puede registrar mensaje para este expediente.'
+      });
+    }
+
+    const codigoMensaje = await generarCodigoUnico(
+      pool,
+      'mensajes_admin_area',
+      'codigo_mensaje',
+      generarCodigoMensajeArea
+    );
+
+    await pool.request()
+      .input('codigo_mensaje', sql.NVarChar, codigoMensaje)
+      .input('id_solicitud', sql.Int, Number(id_solicitud))
+      .input('mensaje', sql.NVarChar, mensaje.trim())
+      .input('tipo_mensaje', sql.NVarChar, 'RECOJO_PRESENCIAL')
+      .input('responsable', sql.NVarChar, responsable || 'Admin de Área')
+      .query(`
+        INSERT INTO mensajes_admin_area (
+          codigo_mensaje,
+          id_solicitud,
+          mensaje,
+          tipo_mensaje,
+          responsable
+        )
+        VALUES (
+          @codigo_mensaje,
+          @id_solicitud,
+          @mensaje,
+          @tipo_mensaje,
+          @responsable
+        )
+      `);
+
+    await registrarHistorial(
+      pool,
+      Number(id_solicitud),
+      'EN_VALIDACION_AREA',
+      `Mensaje de recojo presencial registrado: ${mensaje.trim()}`,
+      responsable || 'Admin de Área'
+    );
+
+    return res.json({
+      mensaje: 'Mensaje de recojo presencial registrado correctamente.',
+      codigo_mensaje: codigoMensaje
+    });
+  } catch (error) {
+    console.error('Error al enviar mensaje de recojo:', error);
+
+    return res.status(500).json({
+      mensaje: 'Error interno al registrar el mensaje de recojo presencial.'
+    });
+  }
+}
+
+async function finalizarTramite(req, res) {
   try {
     const { id_solicitud } = req.params;
 
@@ -542,151 +667,57 @@ async function rechazarSolicitud(req, res) {
 
     if (!descripcion || descripcion.trim() === '') {
       return res.status(400).json({
-        mensaje: 'Debe indicar el motivo del rechazo.'
+        mensaje: 'Debe indicar la descripción de aceptación o finalización.'
       });
     }
 
     const pool = await poolPromise;
 
-    const solicitudResultado = await pool.request()
+    const resultado = await pool.request()
       .input('id_solicitud', sql.Int, Number(id_solicitud))
       .query(`
-        SELECT id_solicitud
+        SELECT id_solicitud, estado
         FROM solicitudes
         WHERE id_solicitud = @id_solicitud
-          AND estado <> 'BORRADOR'
+          AND estado IN ('DERIVADO', 'EN_VALIDACION_AREA')
       `);
 
-    if (solicitudResultado.recordset.length === 0) {
-      return res.status(404).json({
-        mensaje: 'Solicitud no encontrada.'
-      });
-    }
-
-    await pool.request()
-      .input('id_solicitud', sql.Int, Number(id_solicitud))
-      .query(`
-        UPDATE solicitudes
-        SET estado = 'RECHAZADO'
-        WHERE id_solicitud = @id_solicitud
-      `);
-
-    await registrarHistorial(
-      pool,
-      Number(id_solicitud),
-      'RECHAZADO',
-      descripcion.trim(),
-      responsable || 'Revisor'
-    );
-
-    return res.json({
-      mensaje: 'Solicitud rechazada correctamente.',
-      estado: 'RECHAZADO'
-    });
-  } catch (error) {
-    console.error('Error al rechazar solicitud:', error);
-
-    return res.status(500).json({
-      mensaje: 'Error interno al rechazar la solicitud.'
-    });
-  }
-}
-
-async function derivarSolicitud(req, res) {
-  try {
-    const { id_solicitud } = req.params;
-
-    const {
-      oficina_destino,
-      motivo,
-      responsable
-    } = req.body;
-
-    if (!oficina_destino || !motivo) {
+    if (resultado.recordset.length === 0) {
       return res.status(400).json({
-        mensaje: 'Debe indicar oficina destino y motivo de derivación.'
+        mensaje: 'Solo se pueden finalizar solicitudes derivadas o en validación de área.'
       });
     }
-
-    const pool = await poolPromise;
-
-    const solicitudResultado = await pool.request()
-      .input('id_solicitud', sql.Int, Number(id_solicitud))
-      .query(`
-        SELECT id_solicitud
-        FROM solicitudes
-        WHERE id_solicitud = @id_solicitud
-          AND estado <> 'BORRADOR'
-      `);
-
-    if (solicitudResultado.recordset.length === 0) {
-      return res.status(404).json({
-        mensaje: 'Solicitud no encontrada.'
-      });
-    }
-
-    const codigoDerivacion = await generarCodigoUnico(
-      pool,
-      'derivaciones_solicitud',
-      'codigo_derivacion',
-      generarCodigoDerivacion
-    );
 
     await pool.request()
       .input('id_solicitud', sql.Int, Number(id_solicitud))
       .query(`
         UPDATE solicitudes
-        SET estado = 'DERIVADO'
+        SET estado = 'FINALIZADO'
         WHERE id_solicitud = @id_solicitud
-      `);
-
-    await pool.request()
-      .input('codigo_derivacion', sql.NVarChar, codigoDerivacion)
-      .input('id_solicitud', sql.Int, Number(id_solicitud))
-      .input('oficina_destino', sql.NVarChar, oficina_destino)
-      .input('motivo', sql.NVarChar, motivo)
-      .input('responsable', sql.NVarChar, responsable || 'Revisor')
-      .query(`
-        INSERT INTO derivaciones_solicitud (
-          codigo_derivacion,
-          id_solicitud,
-          oficina_destino,
-          motivo,
-          responsable
-        )
-        VALUES (
-          @codigo_derivacion,
-          @id_solicitud,
-          @oficina_destino,
-          @motivo,
-          @responsable
-        )
       `);
 
     await registrarHistorial(
       pool,
       Number(id_solicitud),
-      'DERIVADO',
-      `Solicitud derivada a ${oficina_destino}. Motivo: ${motivo}`,
-      responsable || 'Revisor'
+      'FINALIZADO',
+      descripcion.trim(),
+      responsable || 'Admin de Área'
     );
 
     return res.json({
-      mensaje: 'Solicitud derivada correctamente.',
-      estado: 'DERIVADO',
-      codigo_derivacion: codigoDerivacion,
-      oficina_destino
+      mensaje: 'El trámite fue aceptado y finalizado correctamente.',
+      estado: 'FINALIZADO'
     });
   } catch (error) {
-    console.error('Error al derivar solicitud:', error);
+    console.error('Error al finalizar trámite:', error);
 
     return res.status(500).json({
-      mensaje: 'Error interno al derivar la solicitud.'
+      mensaje: 'Error interno al finalizar el trámite.'
     });
   }
 }
 
-async function verDocumentoSolicitud(req, res) {
+async function verDocumentoAdminArea(req, res) {
   try {
     const { id_documento } = req.params;
 
@@ -722,7 +753,7 @@ async function verDocumentoSolicitud(req, res) {
 
     return res.sendFile(rutaAbsoluta);
   } catch (error) {
-    console.error('Error al ver documento:', error);
+    console.error('Error al abrir documento Admin Área:', error);
 
     return res.status(500).json({
       mensaje: 'Error interno al abrir el documento.'
@@ -730,13 +761,58 @@ async function verDocumentoSolicitud(req, res) {
   }
 }
 
+async function verArchivoArea(req, res) {
+  try {
+    const { id_archivo_area } = req.params;
+
+    const pool = await poolPromise;
+
+    const resultado = await pool.request()
+      .input('id_archivo_area', sql.Int, Number(id_archivo_area))
+      .query(`
+        SELECT
+          id_archivo_area,
+          nombre_original,
+          ruta_archivo
+        FROM archivos_admin_area
+        WHERE id_archivo_area = @id_archivo_area
+      `);
+
+    if (resultado.recordset.length === 0) {
+      return res.status(404).json({
+        mensaje: 'Archivo del área no encontrado.'
+      });
+    }
+
+    const archivo = resultado.recordset[0];
+
+    const rutaRelativa = String(archivo.ruta_archivo || '').replace(/\\/g, '/');
+    const rutaAbsoluta = path.resolve(process.cwd(), rutaRelativa);
+
+    if (!fs.existsSync(rutaAbsoluta)) {
+      return res.status(404).json({
+        mensaje: 'El archivo físico no existe en el servidor.'
+      });
+    }
+
+    return res.sendFile(rutaAbsoluta);
+  } catch (error) {
+    console.error('Error al abrir archivo del área:', error);
+
+    return res.status(500).json({
+      mensaje: 'Error interno al abrir el archivo del área.'
+    });
+  }
+}
+
 module.exports = {
-  obtenerResumenRevisor,
-  listarSolicitudesRevisor,
-  obtenerDetalleSolicitudRevisor,
-  cambiarEstadoSolicitud,
-  observarSolicitud,
-  rechazarSolicitud,
-  derivarSolicitud,
-  verDocumentoSolicitud
+  obtenerResumenAdminArea,
+  listarSolicitudesAdminArea,
+  obtenerDetalleSolicitudAdminArea,
+  tomarEnValidacionArea,
+  subirArchivoArea,
+  enviarMensajeRecojo,
+  finalizarTramite,
+  verDocumentoAdminArea,
+  verArchivoArea
 };

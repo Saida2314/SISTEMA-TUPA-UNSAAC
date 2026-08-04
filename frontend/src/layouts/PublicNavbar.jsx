@@ -1,68 +1,50 @@
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 
 function PublicNavbar() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  function irAConsultas(e) {
-    e.preventDefault();
-
-    if (location.pathname !== '/') {
-      navigate('/?section=consultas');
-      return;
-    }
-
-    const section = document.getElementById('consultas');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
-
-  function abrirNotificaciones() {
-    alert(
-      'Notificaciones\n\nPor ahora no tienes notificaciones públicas.\nCuando inicies sesión, aquí aparecerán avisos sobre tus solicitudes y observaciones.'
-    );
-  }
-
-  function abrirAyuda() {
-    alert(
-      'Ayuda rápida\n\n1. Usa el buscador para encontrar un trámite.\n2. Revisa costo, plazo y categoría.\n3. Presiona Acceder para iniciar sesión.\n4. Luego podrás registrar solicitudes y revisar su estado.'
-    );
-  }
-
   return (
     <header className="public-navbar">
-      <div className="navbar-brand">
+      <div className="public-navbar-brand">
         <img src="/images/logo-unsaac.png" alt="Logo UNSAAC" />
-        <span>TUPA UNSAAC</span>
+
+        <div>
+          <strong>TUPA UNSAAC</strong>
+          <small>Portal de Trámites</small>
+        </div>
       </div>
 
-      <nav className="navbar-menu">
-        <NavLink to="/">Inicio</NavLink>
-        <NavLink to="/tramites">Tramites</NavLink>
-        <a href="#consultas" onClick={irAConsultas}>Consultas</a>
+      <nav className="public-navbar-menu">
+        <NavLink to="/" end>
+          Inicio
+        </NavLink>
+
+        <NavLink to="/tramites">
+          Trámites
+        </NavLink>
+
+        <a href="#consultas">
+          Consultas
+        </a>
       </nav>
 
-      <div className="navbar-actions">
+      <div className="public-navbar-actions">
         <button
           type="button"
-          className="icon-button"
-          onClick={abrirNotificaciones}
+          className="public-icon-button"
           title="Notificaciones"
+          aria-label="Notificaciones"
         >
-          &#128276;
+          <svg
+            className="public-bell-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22ZM18 16v-5a6 6 0 0 0-4.5-5.8V4a1.5 1.5 0 0 0-3 0v1.2A6 6 0 0 0 6 11v5l-1.6 2.1A1 1 0 0 0 5.2 20h13.6a1 1 0 0 0 .8-1.9L18 16Z" />
+          </svg>
         </button>
 
-        <button
-          type="button"
-          className="icon-button"
-          onClick={abrirAyuda}
-          title="Ayuda"
-        >
-          ?
-        </button>
-
-        <Link to="/login" className="access-button">Acceder</Link>
+        <Link to="/login" className="public-login-button">
+          Acceder
+        </Link>
       </div>
     </header>
   );

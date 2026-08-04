@@ -94,6 +94,7 @@ async function obtenerResumenRevisor(req, res) {
         SUM(CASE WHEN estado = 'OBSERVADO' THEN 1 ELSE 0 END) AS observados,
         SUM(CASE WHEN estado = 'RECHAZADO' THEN 1 ELSE 0 END) AS rechazados,
         SUM(CASE WHEN estado = 'DERIVADO' THEN 1 ELSE 0 END) AS derivados,
+        SUM(CASE WHEN estado = 'EN_VALIDACION_AREA' THEN 1 ELSE 0 END) AS en_validacion_area,
         SUM(CASE WHEN estado = 'FINALIZADO' THEN 1 ELSE 0 END) AS finalizados
       FROM solicitudes
       WHERE estado <> 'BORRADOR'
@@ -211,10 +212,11 @@ async function listarSolicitudesRevisor(req, res) {
           WHEN s.estado = 'REGISTRADO' THEN 1
           WHEN s.estado = 'EN_REVISION' THEN 2
           WHEN s.estado = 'OBSERVADO' THEN 3
-          WHEN s.estado = 'DERIVADO' THEN 4
-          WHEN s.estado = 'RECHAZADO' THEN 5
-          WHEN s.estado = 'FINALIZADO' THEN 6
-          ELSE 7
+          WHEN s.estado = 'EN_VALIDACION_AREA' THEN 4
+          WHEN s.estado = 'DERIVADO' THEN 5
+          WHEN s.estado = 'RECHAZADO' THEN 6
+          WHEN s.estado = 'FINALIZADO' THEN 7
+          ELSE 8
         END,
         s.fecha_envio DESC
     `;
@@ -382,12 +384,14 @@ async function cambiarEstadoSolicitud(req, res) {
       'EN_REVISION',
       'OBSERVADO',
       'RECHAZADO',
-      'DERIVADO'
+      'DERIVADO',
+      'EN_VALIDACION_AREA',
+      'FINALIZADO'
     ];
 
     if (!estadosPermitidos.includes(nuevo_estado)) {
       return res.status(400).json({
-        mensaje: 'Estado no válido para el revisor.'
+        mensaje: 'Estado no válido para revisión.'
       });
     }
 
@@ -527,6 +531,61 @@ async function observarSolicitud(req, res) {
 
     return res.status(500).json({
       mensaje: 'Error interno al registrar la observación.'
+    });
+  }
+}
+
+async function aprobarSolicitud(req, res) {
+  try {
+    const { id_solicitud } = req.params;
+
+    const {
+      descripcion,
+      responsable
+    } = req.body;
+
+    const pool = await poolPromise;
+
+    const solicitudResultado = await pool.request()
+      .input('id_solicitud', sql.Int, Number(id_solicitud))
+      .query(`
+        SELECT id_solicitud
+        FROM solicitudes
+        WHERE id_solicitud = @id_solicitud
+          AND estado <> 'BORRADOR'
+      `);
+
+    if (solicitudResultado.recordset.length === 0) {
+      return res.status(404).json({
+        mensaje: 'Solicitud no encontrada.'
+      });
+    }
+
+    await pool.request()
+      .input('id_solicitud', sql.Int, Number(id_solicitud))
+      .query(`
+        UPDATE solicitudes
+        SET estado = 'EN_VALIDACION_AREA'
+        WHERE id_solicitud = @id_solicitud
+      `);
+
+    await registrarHistorial(
+      pool,
+      Number(id_solicitud),
+      'EN_VALIDACION_AREA',
+      descripcion || 'Solicitud aprobada por el revisor y enviada a validación del Admin de Área.',
+      responsable || 'Revisor'
+    );
+
+    return res.json({
+      mensaje: 'Solicitud aprobada y enviada a validación de área.',
+      estado: 'EN_VALIDACION_AREA'
+    });
+  } catch (error) {
+    console.error('Error al aprobar solicitud:', error);
+
+    return res.status(500).json({
+      mensaje: 'Error interno al aprobar la solicitud.'
     });
   }
 }
@@ -736,6 +795,7 @@ module.exports = {
   obtenerDetalleSolicitudRevisor,
   cambiarEstadoSolicitud,
   observarSolicitud,
+  aprobarSolicitud,
   rechazarSolicitud,
   derivarSolicitud,
   verDocumentoSolicitud

@@ -16,6 +16,8 @@ import './roles/usuario/styles/usuario.css';
 import './roles/revisor/styles/revisor.css';
 import './roles/admin-general/styles/admin-general.css';
 import './roles/admin-area/styles/admin-area.css';
+import './roles/admin-general/styles/admin-general.css';
+import './roles/admin-general/styles/admin-general.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

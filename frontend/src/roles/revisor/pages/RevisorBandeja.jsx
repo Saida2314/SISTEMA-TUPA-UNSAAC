@@ -25,14 +25,11 @@ function RevisorBandeja() {
         params.buscar = buscar.trim();
       }
 
-      const response = await api.get('/revisor/solicitudes', {
-        params
-      });
-
-      setSolicitudes(response.data);
+      const response = await api.get('/revisor/solicitudes', { params });
+      setSolicitudes(response.data || []);
     } catch (error) {
       console.error(error);
-      setMensaje('No se pudieron cargar las solicitudes.');
+      setMensaje('No se pudieron cargar los expedientes desde la base de datos.');
     } finally {
       setCargando(false);
     }
@@ -82,6 +79,7 @@ function RevisorBandeja() {
     if (valor === 'RECHAZADO') return 'rejected';
     if (valor === 'DERIVADO') return 'derived';
     if (valor === 'EN_VALIDACION_AREA') return 'validated';
+    if (valor === 'FINALIZADO') return 'validated';
 
     return 'neutral';
   }
@@ -97,10 +95,17 @@ function RevisorBandeja() {
       <section className="revisor-page-heading">
         <div>
           <h1>Bandeja de Revisión</h1>
-          <p>Gestión administrativa de expedientes y trámites institucionales.</p>
+          <p>
+            Expedientes reales enviados por los usuarios. Desde aquí el revisor
+            abre cada solicitud para analizar documentos y voucher.
+          </p>
         </div>
 
-        <button type="button" className="revisor-primary-button" onClick={cargarSolicitudes}>
+        <button
+          type="button"
+          className="revisor-primary-button"
+          onClick={cargarSolicitudes}
+        >
           Actualizar trámites
         </button>
       </section>
@@ -140,6 +145,14 @@ function RevisorBandeja() {
           >
             Observado
           </button>
+
+          <button
+            type="button"
+            className={estado === 'EN_VALIDACION_AREA' ? 'active' : ''}
+            onClick={() => setEstado('EN_VALIDACION_AREA')}
+          >
+            Aprobado
+          </button>
         </div>
 
         <div className="review-search">
@@ -175,13 +188,15 @@ function RevisorBandeja() {
             <tbody>
               {cargando && (
                 <tr>
-                  <td colSpan="6">Cargando solicitudes...</td>
+                  <td colSpan="6">Cargando expedientes desde la base de datos...</td>
                 </tr>
               )}
 
               {!cargando && solicitudesFiltradas.length === 0 && (
                 <tr>
-                  <td colSpan="6">No hay solicitudes para mostrar.</td>
+                  <td colSpan="6">
+                    No hay expedientes registrados todavía. Primero envía una solicitud desde el rol Usuario.
+                  </td>
                 </tr>
               )}
 
@@ -193,7 +208,12 @@ function RevisorBandeja() {
                     </strong>
                   </td>
 
-                  <td>{solicitud.tramite}</td>
+                  <td>
+                    <strong>{solicitud.tramite}</strong>
+                    <small className="review-muted-text">
+                      {solicitud.categoria}
+                    </small>
+                  </td>
 
                   <td>
                     <div className="review-user-cell">
@@ -222,7 +242,7 @@ function RevisorBandeja() {
                       to={`/revisor/solicitudes/${solicitud.id_solicitud}`}
                       className="review-view-button"
                     >
-                      Ver
+                      Ver expediente
                     </Link>
                   </td>
                 </tr>
@@ -232,9 +252,7 @@ function RevisorBandeja() {
         </div>
 
         <footer>
-          <span>
-            Mostrando {solicitudesFiltradas.length} expediente(s)
-          </span>
+          <span>Mostrando {solicitudesFiltradas.length} expediente(s)</span>
 
           <div className="review-pagination">
             <button type="button" disabled>‹</button>
@@ -249,26 +267,6 @@ function RevisorBandeja() {
           {mensaje}
         </p>
       )}
-
-      <section className="review-bottom-metrics">
-        <article>
-          <span>Tiempo promedio</span>
-          <strong>3.2 días</strong>
-          <small>Reducción respecto al mes pasado.</small>
-        </article>
-
-        <article>
-          <span>Trámites finalizados</span>
-          <strong>842</strong>
-          <small>Expedientes cerrados este semestre.</small>
-        </article>
-
-        <article className="server-card">
-          <span>Estado del servidor</span>
-          <strong>Sincronizado</strong>
-          <small>Última actualización: hace 2 minutos.</small>
-        </article>
-      </section>
     </RevisorLayout>
   );
 }
