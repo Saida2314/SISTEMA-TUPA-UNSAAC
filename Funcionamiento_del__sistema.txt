@@ -1,0 +1,84 @@
+---
+
+
+## Roles del sistema
+
+
+El sistema trabaja con los siguientes roles:
+```txt
+USUARIO
+REVISOR
+ADMIN_AREA
+ADMIN_GENERAL
+```
+### Usuario
+
+Puede registrarse, iniciar sesión, consultar trámites, ge
+revisar el estado de sus expedientes y crear tickets de s
+
+### Revisor
+
+Puede revisar solicitudes registradas, observar expedient
+correspondiente.
+
+
+### Administrador de Área
+
+
+Recibe expedientes derivados, los toma en validación, sub
+de recojo presencial y finaliza trámites.
+
+
+### Administrador General
+
+
+Gestiona trámites, categorías, usuarios, revisores y admi
+
+
+---
+
+
+## Flujo principal del trámite
+
+
+```txt
+Usuario registra solicitud
+        ↓
+Solicitud queda en estado REGISTRADO
+        ↓
+Revisor toma el expediente
+        ↓
+Estado EN_REVISION
+        ↓
+Revisor puede observar, rechazar o derivar
+        ↓
+Si deriva, pasa a estado DERIVADO
+        ↓
+Admin Área toma el expediente
+        ↓
+Estado EN_VALIDACION_AREA
+        ↓
+Admin Área valida y finaliza
+        ↓
+Estado FINALIZADO
+```
+
+
+Estados principales utilizados:
+
+
+```txt
+BORRADOR
+REGISTRADO
+EN_REVISION
+OBSERVADO
+SUBSANADO
+RECHAZADO
+DERIVADO
+EN_VALIDACION_AREA
+FINALIZADO
+```
+
+
+---
+
